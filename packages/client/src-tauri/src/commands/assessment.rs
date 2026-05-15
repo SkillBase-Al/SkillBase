@@ -118,6 +118,14 @@ pub fn batch_assess(conn: State<DbConn>) -> Result<crate::db::models::Assessment
                 };
                 let _ = repository::insert_assessment(&conn, &assessment);
 
+                // Update format_score on installed_skills
+                if let Ok(db) = conn.lock() {
+                    let _ = db.execute(
+                        "UPDATE installed_skills SET format_score = ?1 WHERE id = ?2",
+                        rusqlite::params![fmt_result.score, skill.id],
+                    );
+                }
+
                 if fmt_result.score >= 60 { passed += 1; }
             }
         }
@@ -143,6 +151,26 @@ pub fn batch_assess(conn: State<DbConn>) -> Result<crate::db::models::Assessment
             "Warning" => warning_count += 1,
             _ => dangerous_count += 1,
         }
+
+        // Save security assessment result
+        let sec_assessment = AssessmentResult {
+            id: Uuid::new_v4().to_string(),
+            skill_id: skill.id.clone(),
+            dimension: "security".into(),
+            score: sec_result.score,
+            issues: serde_json::to_string(&sec_result.issues).unwrap_or_default(),
+            assessed_at: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+        };
+        let _ = repository::insert_assessment(&conn, &sec_assessment);
+
+        // Update safety_level on installed_skills
+        if let Ok(db) = conn.lock() {
+            let _ = db.execute(
+                "UPDATE installed_skills SET safety_level = ?1 WHERE id = ?2",
+                rusqlite::params![sec_result.level, skill.id],
+            );
+        }
+
 
         total += 1;
     }
