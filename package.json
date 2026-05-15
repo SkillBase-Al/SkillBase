@@ -1,0 +1,19 @@
+{
+  "name": "skill-manager",
+  "private": true,
+  "workspaces": ["packages/client", "packages/server"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "cd packages/client && npm run tauri dev",
+    "dev:server": "cd packages/server && cargo run",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd packages/client && npm run tauri build",
+    "build:server": "cd packages/server && cargo build --release",
+    "lint": "eslint packages/client/src --ext .ts,.tsx",
+    "format": "prettier --write 'packages/client/src/**/*.{ts,tsx,css}'"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.2.5"
+  }
+}

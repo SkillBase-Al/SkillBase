@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+import { getLocale, useTranslations } from '../i18n';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  locale?: 'zh' | 'en';
+  canonical?: string;
+}
+
+const { title, description, canonical } = Astro.props;
+const loc = Astro.props.locale ?? getLocale(Astro.url);
+const { t } = useTranslations(loc);
+
+const siteTitle = title ?? t('site.title');
+const siteDesc = description ?? t('site.description');
+const siteUrl = 'https://skillbase.app';
+const canonicalUrl = canonical ?? (loc === 'en' ? `${siteUrl}/en/` : `${siteUrl}/`);
+const enUrl = `${siteUrl}/en/`;
+const zhUrl = `${siteUrl}/`;
+const ogImage = `${siteUrl}/og-image.png`;
+---
+
+<!doctype html>
+<html lang={loc === 'en' ? 'en' : 'zh-CN'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{siteTitle}</title>
+    <meta name="description" content={siteDesc} />
+
+    <!-- Canonical -->
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Hreflang -->
+    <link rel="alternate" hreflang="zh" href={zhUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={zhUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={siteDesc} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={siteDesc} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SkillBase",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Windows, Linux",
+      "description": siteDesc,
+      "url": canonicalUrl,
+      "version": "0.1.0",
+      "license": "https://github.com/SkillBase-Al/SkillBase/blob/main/LICENSE",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    })} />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

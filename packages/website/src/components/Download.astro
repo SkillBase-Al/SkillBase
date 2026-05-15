@@ -1,0 +1,118 @@
+---
+export interface Props {
+  locale: 'zh' | 'en';
+  t: (path: string) => string;
+}
+
+const { locale, t } = Astro.props;
+
+const platforms = [
+  { id: 'macos', icon: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z' },
+  { id: 'windows', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+  { id: 'linux', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+];
+---
+
+<section id="download" class="section-padding bg-slate-50">
+  <div class="section-container">
+    <!-- Section header -->
+    <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-medium mb-4">
+        {t('download.version')}
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">{t('download.title')}</h2>
+      <p class="mt-3 text-lg text-slate-500">{t('download.subtitle')}</p>
+    </div>
+
+    <!-- Download cards -->
+    <div class="max-w-3xl mx-auto" id="download-container">
+      <!-- OS detection message -->
+      <p class="text-sm text-slate-500 text-center mb-6" id="os-detected">
+        {t('download.notDetected')}
+      </p>
+
+      <div class="grid sm:grid-cols-3 gap-4">
+        {platforms.map((p) => (
+          <div class="group relative rounded-2xl border border-slate-200 bg-white p-6 text-center hover:border-brand-200 hover:shadow-lg transition-all duration-300 cursor-pointer" data-platform={p.id}>
+            <div class="flex items-center justify-center h-12 w-12 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors mx-auto mb-3">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={p.icon} />
+              </svg>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-1">{t(`download.${p.id}`)}</h3>
+            <p class="text-xs text-slate-400 mb-4">{
+              locale === 'zh'
+                ? (p.id === 'macos' ? '.dmg' : p.id === 'windows' ? '.exe' : '.deb/.AppImage')
+                : (p.id === 'macos' ? '.dmg' : p.id === 'windows' ? '.exe' : '.deb/.AppImage')
+            }</p>
+            <a
+              href="#"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition-colors opacity-50 pointer-events-none"
+              data-download-link={p.id}
+            >
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              {t('download.downloadBtn')}
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    const detectedMsg = document.getElementById('os-detected');
+    const t = {
+      'zh': {
+        'detected': '检测到你的系统：',
+        'notDetected': '请选择你的操作系统'
+      },
+      'en': {
+        'detected': 'Detected your system:',
+        'notDetected': 'Select your operating system'
+      }
+    };
+    const locale = document.documentElement.lang === 'en' ? 'en' : 'zh';
+
+    // OS detection
+    const platform = navigator.platform.toLowerCase();
+    let detected = null;
+    if (platform.includes('mac')) detected = 'macos';
+    else if (platform.includes('win')) detected = 'windows';
+    else if (platform.includes('linux')) detected = 'linux';
+
+    // Highlight detected platform
+    if (detected) {
+      detectedMsg.textContent = t[locale].detected;
+      const cards = document.querySelectorAll('[data-platform]');
+      cards.forEach(card => {
+        if (card.dataset.platform === detected) {
+          card.classList.add('ring-2', 'ring-brand-500', 'border-brand-300');
+        }
+      });
+    }
+
+    // Click handler for platform selection
+    document.querySelectorAll('[data-platform]').forEach(card => {
+      card.addEventListener('click', () => {
+        const platformId = card.dataset.platform;
+        const link = card.querySelector('[data-download-link]');
+        if (link) {
+          // Placeholder: replace with actual download URL
+          const urls = {
+            macos: '#',
+            windows: '#',
+            linux: '#'
+          };
+          // In real usage: window.location.href = urls[platformId];
+          // For now show the download button is active
+          link.classList.remove('opacity-50', 'pointer-events-none');
+          link.href = urls[platformId] || '#';
+        }
+      });
+    });
+  })();
+</script>

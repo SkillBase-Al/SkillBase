@@ -1,0 +1,129 @@
+{
+  "site": {
+    "title": "SkillBase — Multi-Agent AI Skill Management Tool",
+    "description": "SkillBase is a cross-platform AI Agent skill management center. Seamlessly manage and sync SKILL.md across Claude, OpenAI Codex, Cursor, OpenCode, Windsurf, Qoder, and more."
+  },
+  "nav": {
+    "features": "Features",
+    "agents": "Agents",
+    "screenshots": "Screenshots",
+    "download": "Download",
+    "faq": "FAQ",
+    "language": "中文",
+    "languageHref": "/"
+  },
+  "hero": {
+    "title": "Manage SKILL.md Across All AI Agents",
+    "subtitle": "Sync skills across Claude, Cursor, OpenCode, Windsurf & more",
+    "description": "Install, uninstall, sync, and manage AI agent skill files from one desktop app. No more scattered configuration — everything in one place.",
+    "cta": "Download Free",
+    "github": "GitHub"
+  },
+  "features": {
+    "title": "Core Features",
+    "subtitle": "One tool to manage AI skills for all your agents",
+    "install": {
+      "title": "Install & Uninstall",
+      "desc": "Install or remove SKILL.md skills with one click. Automatically syncs to all configured agent directories."
+    },
+    "scan": {
+      "title": "Smart Scanning",
+      "desc": "Automatically discover SKILL.md files across all agent paths. Detect new skills, resolve conflicts, and remove duplicates."
+    },
+    "security": {
+      "title": "Security Check",
+      "desc": "Built-in format and security assessment for every skill. Know what's safe to use before you install."
+    },
+    "sync": {
+      "title": "Multi-Agent Sync",
+      "desc": "Install once, sync to all your agents. Share best practices across Claude, Cursor, OpenCode, and more."
+    }
+  },
+  "agents": {
+    "title": "Supported AI Agents",
+    "subtitle": "Manage skills for all major AI coding assistants",
+    "customNote": "Also supports custom paths — configure skills directory for any agent",
+    "agents": {
+      "claude": {
+        "name": "Claude Code",
+        "desc": "Manage Claude Code SKILL.md files installed to ~/.claude/skills/"
+      },
+      "cursor": {
+        "name": "Cursor",
+        "desc": "Manage Cursor custom instructions and rules"
+      },
+      "codex": {
+        "name": "OpenAI Codex",
+        "desc": "Manage Codex CLI skill configurations"
+      },
+      "opencode": {
+        "name": "OpenCode",
+        "desc": "Manage OpenCode Agent skills configuration"
+      },
+      "windsurf": {
+        "name": "Windsurf",
+        "desc": "Manage Windsurf workflow rules"
+      },
+      "qoder": {
+        "name": "Qoder",
+        "desc": "Manage Qoder Agent skills configuration"
+      },
+      "custom": {
+        "name": "Custom Agent",
+        "desc": "Custom path support — configure skills directory for any agent"
+      }
+    }
+  },
+  "screenshots": {
+    "title": "Screenshots",
+    "subtitle": "Clean, intuitive interface design",
+    "alt": "SkillBase SKILL.md manager screenshot - Cross-agent AI skill management"
+  },
+  "download": {
+    "title": "Download SkillBase",
+    "subtitle": "Free and open source. Available for macOS, Windows, and Linux.",
+    "version": "v0.1.0",
+    "macos": "macOS",
+    "windows": "Windows",
+    "linux": "Linux",
+    "downloadBtn": "Download",
+    "size": "Size",
+    "detected": "Detected your system:",
+    "notDetected": "Select your operating system"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know",
+    "items": [
+      {
+        "q": "What is SKILL.md?",
+        "a": "SKILL.md is an AI skill format defined by Claude Code, providing domain knowledge and instructions to AI coding assistants. SkillBase manages these skill files and syncs them across multiple agents."
+      },
+      {
+        "q": "Which AI agents does SkillBase support?",
+        "a": "SkillBase supports Claude Code, OpenAI Codex, Cursor, OpenCode, Windsurf, Qoder, and other major AI coding assistants. We continuously add support for more agents."
+      },
+      {
+        "q": "How do I sync skills between multiple agents?",
+        "a": "After installing SkillBase, add your agent paths. When you install a skill, it automatically syncs to all configured agent directories — no manual copying needed."
+      },
+      {
+        "q": "Does SkillBase modify my skill files?",
+        "a": "No. SkillBase creates mappings between your agent directories and the local skill library, leaving original files intact."
+      },
+      {
+        "q": "Is SkillBase free?",
+        "a": "Yes, SkillBase is completely free and open source."
+      },
+      {
+        "q": "How do I uninstall SkillBase?",
+        "a": "Simply delete the app. All data is stored in ~/.skillbase — clean it up manually if needed."
+      }
+    ]
+  },
+  "footer": {
+    "copyright": "SkillBase Open Source Project",
+    "license": "Apache License 2.0",
+    "builtWith": "Built with Astro"
+  }
+}

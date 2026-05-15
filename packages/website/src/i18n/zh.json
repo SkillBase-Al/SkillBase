@@ -1,0 +1,129 @@
+{
+  "site": {
+    "title": "SkillBase — 多 Agent AI 技能统一管理工具",
+    "description": "SkillBase 是跨平台 AI Agent 技能管理中心，支持 Claude、OpenAI Codex、Cursor、OpenCode、Windsurf、Qoder 等主流工具间无缝同步和管理 SKILL.md。"
+  },
+  "nav": {
+    "features": "功能",
+    "agents": "支持 Agent",
+    "screenshots": "截图",
+    "download": "下载",
+    "faq": "常见问题",
+    "language": "English",
+    "languageHref": "/en/"
+  },
+  "hero": {
+    "title": "多 Agent AI 技能统一管理工具",
+    "subtitle": "跨 Claude、Cursor、OpenCode、Windsurf 同步管理 SKILL.md",
+    "description": "在一个桌面应用中统一安装、卸载、同步和管理所有 AI 编程助手的技能文件。告别分散管理，一站搞定。",
+    "cta": "免费下载",
+    "github": "GitHub"
+  },
+  "features": {
+    "title": "核心功能",
+    "subtitle": "一站式管理所有 Agent 的 AI 技能",
+    "install": {
+      "title": "安装与卸载",
+      "desc": "一键安装或卸载 SKILL.md 技能，自动同步到已配置的 Agent 目录中。"
+    },
+    "scan": {
+      "title": "智能扫描",
+      "desc": "自动扫描本地各 Agent 路径下的 SKILL.md，发现新技能并去重。"
+    },
+    "security": {
+      "title": "安全检查",
+      "desc": "自动评估技能文件的安全级别和格式规范，确保使用的技能安全可靠。"
+    },
+    "sync": {
+      "title": "多 Agent 同步",
+      "desc": "安装一次即可将技能同步到多个 Agent，跨工具共享最佳实践。"
+    }
+  },
+  "agents": {
+    "title": "支持的主流 Agent",
+    "subtitle": "统一管理所有 AI 编程助手的技能",
+    "customNote": "亦支持自定义路径，可配置任意 Agent 的 skills 目录",
+    "agents": {
+      "claude": {
+        "name": "Claude Code",
+        "desc": "管理 Claude Code 的 SKILL.md 技能，安装到 ~/.claude/skills/"
+      },
+      "cursor": {
+        "name": "Cursor",
+        "desc": "管理 Cursor 的自定义指令和规则文件"
+      },
+      "codex": {
+        "name": "OpenAI Codex",
+        "desc": "管理 Codex CLI 的技能配置文件"
+      },
+      "opencode": {
+        "name": "OpenCode",
+        "desc": "管理 OpenCode Agent 的 skills 配置"
+      },
+      "windsurf": {
+        "name": "Windsurf",
+        "desc": "管理 Windsurf 工作流规则"
+      },
+      "qoder": {
+        "name": "Qoder",
+        "desc": "管理 Qoder Agent 的 skills 配置"
+      },
+      "custom": {
+        "name": "自定义 Agent",
+        "desc": "支持自定义路径，可配置任意 Agent 的 skills 目录"
+      }
+    }
+  },
+  "screenshots": {
+    "title": "应用截图",
+    "subtitle": "直观易用的界面设计",
+    "alt": "SkillBase SKILL.md 管理工具截图 - 跨多 Agent 管理 AI 技能"
+  },
+  "download": {
+    "title": "下载 SkillBase",
+    "subtitle": "免费开源，支持 macOS、Windows、Linux",
+    "version": "v0.1.0",
+    "macos": "macOS",
+    "windows": "Windows",
+    "linux": "Linux",
+    "downloadBtn": "下载",
+    "size": "大小",
+    "detected": "检测到你的系统：",
+    "notDetected": "请选择你的操作系统"
+  },
+  "faq": {
+    "title": "常见问题",
+    "subtitle": "你想知道的都在这里",
+    "items": [
+      {
+        "q": "什么是 SKILL.md？",
+        "a": "SKILL.md 是 Claude Code 定义的 AI 技能格式，用于向 AI 编程助手提供特定领域知识和指令。SkillBase 可以管理这些技能文件并在多个 Agent 间同步。"
+      },
+      {
+        "q": "SkillBase 支持哪些 AI Agent？",
+        "a": "目前支持 Claude Code、OpenAI Codex、Cursor、OpenCode、Windsurf、Qoder 等主流 AI 编程助手，我们会持续添加更多 Agent 支持。"
+      },
+      {
+        "q": "如何在多个 Agent 间同步 skills？",
+        "a": "安装 SkillBase 后，添加你使用的 Agent 路径，安装技能时会自动同步到所有已配置的 Agent 目录，无需手动复制。"
+      },
+      {
+        "q": "SkillBase 会修改我的技能文件吗？",
+        "a": "不会修改原始文件。SkillBase 在你的 Agent 目录和本地技能库之间建立映射，保证原始文件完整性。"
+      },
+      {
+        "q": "SkillBase 是免费的吗？",
+        "a": "是的，SkillBase 是完全免费且开源的项目。"
+      },
+      {
+        "q": "如何卸载 SkillBase？",
+        "a": "直接删除应用即可，所有数据存储在 ~/.skillbase 目录下，根据需要手动清理。"
+      }
+    ]
+  },
+  "footer": {
+    "copyright": "SkillBase 开源项目",
+    "license": "Apache License 2.0",
+    "builtWith": "Built with Astro"
+  }
+}

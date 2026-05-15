@@ -1,0 +1,70 @@
+---
+export interface Props {
+  locale: 'zh' | 'en';
+  t: (path: string) => string;
+  dict: Record<string, unknown>;
+}
+
+const { locale, t } = Astro.props;
+---
+
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+  <!-- Background gradient -->
+  <div class="absolute inset-0 bg-gradient-to-b from-brand-50 via-white to-white pointer-events-none" />
+  <div class="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-brand-200/40 to-purple-200/40 rounded-full blur-3xl pointer-events-none" />
+
+  <div class="section-container relative z-10 text-center py-20">
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-medium mb-6">
+      <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
+      v0.1.0 — Open Source
+    </div>
+
+    <!-- Main heading -->
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight max-w-4xl mx-auto">
+      {locale === 'zh' ? (
+        <>
+          多 Agent AI 技能<br class="sm:hidden" />
+          <span class="gradient-text">统一管理工具</span>
+        </>
+      ) : (
+        <>
+          Manage <span class="gradient-text">SKILL.md</span><br class="sm:hidden" />
+          Across All AI Agents
+        </>
+      )}
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="mt-4 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
+      {t('hero.subtitle')}
+    </p>
+
+    <!-- Description -->
+    <p class="mt-4 text-base text-slate-500 max-w-2xl mx-auto">
+      {t('hero.description')}
+    </p>
+
+    <!-- CTA Buttons -->
+    <div class="mt-8 flex items-center justify-center gap-4">
+      <a
+        href="#download"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
+      >
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        {t('hero.cta')}
+      </a>
+      <a
+        href="https://github.com/SkillBase-Al/SkillBase"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+      >
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        {t('hero.github')}
+      </a>
+    </div>
+  </div>
+</section>
