@@ -4,16 +4,6 @@
 
 SkillBase is a cross-platform desktop application that acts as an "App Store" for AI agent skills. It helps you discover, sync, and manage `SKILL.md` files across Claude Code, Cursor, OpenCode, Windsurf, Qoder, OpenAI Codex, and any custom agent.
 
-## Download
-
-| Platform | Package |
-|----------|---------|
-| macOS (Apple Silicon) | [SkillBase_0.1.1_aarch64.dmg](https://skills.yy-crow.com/downloads/SkillBase_0.1.1_aarch64.dmg) |
-| Windows | [SkillBase_0.1.1_x64-setup.exe](https://skills.yy-crow.com/downloads/SkillBase_0.1.1_x64-setup.exe) / [.msi](https://skills.yy-crow.com/downloads/SkillBase_0.1.1_x64_en-US.msi) |
-| Linux | [SkillBase_0.1.1_amd64.AppImage](https://skills.yy-crow.com/downloads/SkillBase_0.1.1_amd64.AppImage) / [.deb](https://skills.yy-crow.com/downloads/SkillBase_0.1.1_amd64.deb) |
-
-Also available on [GitHub Releases](https://github.com/SkillBase-Al/SkillBase/releases).
-
 ## Features
 
 - **Discover** — Browse and search a skill marketplace with hundreds of open-source SKILL.md files from curated GitHub repositories (e.g., `anthropics/skills`).
