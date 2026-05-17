@@ -24,6 +24,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/skillbase
       GITHUB_TOKEN: "${GITHUB_TOKEN}"
+      CRAWL_REPOS: "${CRAWL_REPOS}"
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: "3007"
       LLM_PROVIDER: "${LLM_PROVIDER:-openai}"

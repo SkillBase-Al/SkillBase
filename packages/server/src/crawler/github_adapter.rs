@@ -4,7 +4,6 @@ use crate::crawler::RawSkill;
 use serde::Deserialize;
 
 const GITHUB_API: &str = "https://api.github.com";
-const SEARCH_QUERY: &str = "filename:SKILL.md";
 const PER_PAGE: u32 = 100;
 const MAX_PAGES: u32 = 2;
 
@@ -40,8 +39,24 @@ struct GitHubLicense {
     spdx_id: Option<String>,
 }
 
-/// Fetch skills from GitHub by searching for SKILL.md files with permissive licenses.
+/// Fetch skills from GitHub based on configured fixed repo sources.
+///
+/// Reads `CRAWL_REPOS` env var for a comma-separated list of `owner/repo` pairs.
+/// Only searches within those configured repos. If `CRAWL_REPOS` is empty/unset,
+/// no GitHub crawling is performed.
 pub async fn fetch_skills() -> Result<Vec<RawSkill>, Box<dyn std::error::Error + Send + Sync>> {
+    let repos = match std::env::var("CRAWL_REPOS") {
+        Ok(s) if !s.trim().is_empty() => s
+            .split(',')
+            .map(|r| r.trim().to_string())
+            .filter(|r| !r.is_empty())
+            .collect::<Vec<_>>(),
+        _ => {
+            tracing::info!("CRAWL_REPOS not set, skipping GitHub crawl");
+            return Ok(Vec::new());
+        }
+    };
+
     let token = std::env::var("GITHUB_TOKEN")
         .map_err(|_| "GITHUB_TOKEN environment variable not set".to_string())?;
 
@@ -54,25 +69,41 @@ pub async fn fetch_skills() -> Result<Vec<RawSkill>, Box<dyn std::error::Error +
     let mut retry_count: u32 = 0;
     let max_retries: u32 = 3;
 
-    for page in 1..=MAX_PAGES {
-        let url = format!(
-            "{}/search/code?q={}&per_page={}&page={}",
-            GITHUB_API, SEARCH_QUERY, PER_PAGE, page
-        );
+    for repo in &repos {
+        tracing::info!("Crawling repo: {}", repo);
 
-        let search_data = fetch_search_page(&client, &token, &url, &mut retry_count, max_retries)
-            .await?;
+        // Search for SKILL.md files within this specific repo
+        for page in 1..=MAX_PAGES {
+            let url = format!(
+                "{}/search/code?q=filename:SKILL.md+repo:{}&per_page={}&page={}",
+                GITHUB_API, repo, PER_PAGE, page
+            );
 
-        if search_data.items.is_empty() {
-            tracing::info!("No more GitHub search results on page {}", page);
-            break;
+            let search_data = match fetch_search_page(&client, &token, &url, &mut retry_count, max_retries).await {
+                Ok(data) => data,
+                Err(e) => {
+                    tracing::warn!("Failed to search repo {}: {}", repo, e);
+                    break;
+                }
+            };
+
+            if search_data.items.is_empty() {
+                break;
+            }
+
+            let prev_len = all_items.len();
+            all_items.extend(search_data.items);
+            tracing::info!(
+                "Found {} SKILL.md files in repo {} (page {}/{})",
+                all_items.len() - prev_len,
+                repo,
+                page,
+                MAX_PAGES
+            );
         }
-
-        all_items.extend(search_data.items);
-        tracing::info!("Fetched page {}/{} of GitHub search results", page, MAX_PAGES);
     }
 
-    tracing::info!("Total GitHub items found: {}", all_items.len());
+    tracing::info!("Total GitHub items found across all configured repos: {}", all_items.len());
 
     let mut skills = Vec::new();
     for item in &all_items {
