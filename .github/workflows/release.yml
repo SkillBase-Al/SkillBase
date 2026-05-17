@@ -8,27 +8,6 @@ permissions:
   contents: write
 
 jobs:
-  server-docker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and export
-        uses: docker/build-push-action@v5
-        with:
-          context: packages/server
-          tags: skillbase/server:latest
-          outputs: type=docker,dest=/tmp/server.tar
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-docker
-          path: /tmp/server.tar
-
   tauri-build:
     strategy:
       fail-fast: false
