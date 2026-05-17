@@ -28,3 +28,11 @@ packages/server/admin-dist/
 
 # Project-specific Claude Code instructions (machine-local)
 CLAUDE.md
+
+# Release build artifacts
+release/
+packages/website/public/downloads/*.dmg
+packages/website/public/downloads/*.exe
+packages/website/public/downloads/*.AppImage
+packages/website/public/downloads/*.deb
+packages/website/public/downloads/*.msi
