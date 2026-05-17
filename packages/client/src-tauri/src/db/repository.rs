@@ -90,6 +90,13 @@ fn run_migrations(conn: &Connection) -> Result<(), String> {
             resolved INTEGER NOT NULL DEFAULT 0,
             kept_candidate_id TEXT,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS feedback (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
         );"
     ).map_err(|e| format!("Migration error: {}", e))?;
     Ok(())
@@ -450,6 +457,17 @@ pub fn clear_dedup_groups(conn: &DbConn) -> Result<(), String> {
     let db = conn.lock().map_err(|e| e.to_string())?;
     db.execute_batch("DELETE FROM dedup_group_skills; DELETE FROM dedup_groups;")
         .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+// --- Feedback ---
+
+pub fn insert_feedback(conn: &DbConn, fb: &Feedback) -> Result<(), String> {
+    let db = conn.lock().map_err(|e| e.to_string())?;
+    db.execute(
+        "INSERT INTO feedback (id, title, description, created_at) VALUES (?1, ?2, ?3, ?4)",
+        params![fb.id, fb.title, fb.description, fb.created_at],
+    ).map_err(|e| e.to_string())?;
     Ok(())
 }
 

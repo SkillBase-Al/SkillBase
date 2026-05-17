@@ -4,6 +4,8 @@ import {
   Compass,
   WifiOff,
   RefreshCw,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { SkillGrid } from '../components/skill/SkillGrid';
@@ -11,6 +13,7 @@ import { SkillCard } from '../components/skill/SkillCard';
 import { SkillDetail } from '../components/skill/SkillDetail';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 import { useMarketStore } from '../stores/marketStore';
 import { useInstalledStore } from '../stores/installedStore';
 import { getCategories } from '../services/tauri';
@@ -18,7 +21,7 @@ import type { MarketSkill } from '../types/skill';
 
 function DiscoverPage() {
   const navigate = useNavigate();
-  const { skills, categories, isLoading, error, search } = useMarketStore();
+  const { skills, categories, isLoading, error, search, currentPage, totalPages, total, perPage } = useMarketStore();
   const { install } = useInstalledStore();
 
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -28,14 +31,16 @@ function DiscoverPage() {
   const [cachedCategories, setCachedCategories] = React.useState<string[]>([]);
   const [isOffline, setIsOffline] = React.useState(false);
 
-  // Load categories on mount
+  // Load categories and fetch initial skills on mount
   React.useEffect(() => {
     getCategories()
       .then(setCachedCategories)
       .catch(() => setIsOffline(true));
-  }, []);
+    search('', undefined, 1);
+  }, [search]);
 
-  // Search with 300ms debounce
+  // Search with 300ms debounce on query/category change (resets to page 1)
+  // Page changes via pagination buttons call search directly and skip debounce
   const previousQueryRef = React.useRef('');
   const previousCategoryRef = React.useRef('all');
   React.useEffect(() => {
@@ -46,7 +51,7 @@ function DiscoverPage() {
     previousCategoryRef.current = cat;
 
     const timer = setTimeout(() => {
-      search(q, cat === 'all' ? undefined : cat);
+      search(q, cat === 'all' ? undefined : cat, 1);
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery, activeCategory, search]);
@@ -92,9 +97,9 @@ function DiscoverPage() {
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             Discover
           </span>
-          {!isLoading && skills.length > 0 && (
+          {!isLoading && total > 0 && (
             <Badge variant="outline" className="text-xs">
-              {skills.length} results
+              {total} results
             </Badge>
           )}
         </div>
@@ -119,7 +124,7 @@ function DiscoverPage() {
             <button
               onClick={() => {
                 const q = searchQuery.trim();
-                search(q, activeCategory === 'all' ? undefined : activeCategory);
+                search(q, activeCategory === 'all' ? undefined : activeCategory, 1);
               }}
               className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
             >
@@ -149,6 +154,65 @@ function DiscoverPage() {
             />
           )}
         />
+
+        {/* Pagination */}
+        {totalPages > 1 && !isLoading && (
+          <div className="flex items-center justify-center gap-1.5 py-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => useMarketStore.getState().search(
+                searchQuery.trim(),
+                activeCategory === 'all' ? undefined : activeCategory,
+                currentPage - 1,
+              )}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+              // Show first, last, and pages near current
+              const show = p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1;
+              const prev = p - 1;
+              if (!show && prev >= 1 && (prev === 1 || prev === totalPages || Math.abs(prev - currentPage) <= 1)) {
+                // Show ellipsis before this page
+                return <span key={p} className="text-xs text-slate-400 px-1">...</span>;
+              }
+              if (!show) return null;
+              return (
+                <Button
+                  key={p}
+                  variant={p === currentPage ? 'default' : 'outline'}
+                  size="sm"
+                  className="min-w-[32px]"
+                  onClick={() => {
+                    if (p !== currentPage) {
+                      useMarketStore.getState().search(
+                        searchQuery.trim(),
+                        activeCategory === 'all' ? undefined : activeCategory,
+                        p,
+                      );
+                    }
+                  }}
+                >
+                  {p}
+                </Button>
+              );
+            })}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => useMarketStore.getState().search(
+                searchQuery.trim(),
+                activeCategory === 'all' ? undefined : activeCategory,
+                currentPage + 1,
+              )}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Detail Panel */}

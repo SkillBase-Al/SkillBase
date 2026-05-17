@@ -8,13 +8,15 @@ const CACHE_TTL: Duration = Duration::from_secs(600);
 pub struct MarketSkill {
     pub id: String,
     pub name: String,
-    pub description: String,
+    #[serde(default)]
+    pub description: Option<String>,
     pub source: String,
     pub source_url: Option<String>,
     pub license: Option<String>,
     pub author: Option<String>,
     pub rating: Option<f64>,
     pub install_count: Option<i32>,
+    #[serde(default)]
     pub categories: Vec<String>,
     pub safety_level: Option<String>,
     pub format_score: Option<i32>,
@@ -67,11 +69,21 @@ pub struct MarketClient {
 }
 
 impl MarketClient {
-    pub fn new(base_url: &str) -> Self {
-        let client = reqwest::Client::builder()
-            .timeout(DEFAULT_TIMEOUT)
-            .build()
-            .unwrap_or_default();
+    pub fn new(base_url: &str, proxy_url: Option<&str>) -> Self {
+        let mut builder = reqwest::Client::builder()
+            .timeout(DEFAULT_TIMEOUT);
+
+        if let Some(proxy) = proxy_url {
+            if !proxy.is_empty() {
+                if let Ok(p) = reqwest::Proxy::all(proxy) {
+                    // Bypass proxy for localhost and loopback addresses
+                    let p = p.no_proxy(reqwest::NoProxy::from_string("localhost,127.0.0.1,::1"));
+                    builder = builder.proxy(p);
+                }
+            }
+        }
+
+        let client = builder.build().unwrap_or_default();
 
         Self {
             base_url: base_url.trim_end_matches('/').to_string(),

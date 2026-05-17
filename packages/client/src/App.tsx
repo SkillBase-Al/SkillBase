@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { FirstRunWizard } from './components/layout/FirstRunWizard';
 import { ToastProvider } from './components/ui/toast';
@@ -9,6 +9,7 @@ import { DedupPage } from './pages/DedupPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ConflictResolver } from './components/skill/ConflictResolver';
 import { checkFirstRun, getSkillConflicts } from './services/tauri';
+import { sendHeartbeat, sendPageview } from './services/telemetry';
 
 function App() {
   const [isFirstRun, setIsFirstRun] = React.useState<boolean | null>(null);
@@ -48,6 +49,7 @@ function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
+        <TelemetryTracker />
         {isFirstRun && (
           <FirstRunWizard onComplete={() => setIsFirstRun(false)} />
         )}
@@ -70,6 +72,29 @@ function App() {
       </BrowserRouter>
     </ToastProvider>
   );
+}
+
+/** Track page views via telemetry */
+function TelemetryTracker() {
+  const location = useLocation();
+  const tracked = React.useRef(false);
+
+  // Send heartbeat on first mount
+  React.useEffect(() => {
+    sendHeartbeat();
+  }, []);
+
+  // Send pageview on route change
+  React.useEffect(() => {
+    // Skip the initial /discover redirect if first run
+    if (!tracked.current) {
+      tracked.current = true;
+      return;
+    }
+    sendPageview(location.pathname);
+  }, [location.pathname]);
+
+  return null;
 }
 
 export default App;

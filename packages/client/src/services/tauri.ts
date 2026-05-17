@@ -19,17 +19,17 @@ export async function getInstalledSkills(): Promise<InstalledSkill[]> {
 export async function installSkill(skillId: string): Promise<InstalledSkill> {
   // First fetch full skill detail from market
   const detail = await getSkillDetail(skillId);
-  // Then invoke install with all required fields (snake_case matches Rust)
+  // Then invoke install with all required fields (camelCase for Tauri v2)
   return invoke<InstalledSkill>('install_skill', {
     name: detail.name,
     description: detail.description,
     source: detail.version || 'unknown',
-    source_url: null,
+    sourceUrl: null,
     version: detail.version || null,
     license: null,
     author: detail.author || null,
-    skill_content: '',
-    agent_ids: [],
+    skillContent: '',
+    agentIds: [],
   });
 }
 
@@ -38,21 +38,21 @@ export async function uninstallSkill(skillId: string): Promise<void> {
 }
 
 export async function updateSkill(skillId: string, skillContent: string): Promise<void> {
-  return invoke<void>('update_skill', { id: skillId, skill_content: skillContent });
+  return invoke<void>('update_skill', { id: skillId, skillContent });
 }
 
 export async function applySkillToAgents(
   skillId: string,
   agentIds: string[],
 ): Promise<void> {
-  return invoke<void>('apply_skill_to_agents', { skill_id: skillId, agent_ids: agentIds });
+  return invoke<void>('apply_skill_to_agents', { skillId, agentIds });
 }
 
 export async function removeSkillFromAgents(
   skillId: string,
   agentIds: string[],
 ): Promise<void> {
-  return invoke<void>('remove_skill_from_agents', { skill_id: skillId, agent_ids: agentIds });
+  return invoke<void>('remove_skill_from_agents', { skillId, agentIds });
 }
 
 export async function toggleSkillEnabled(
@@ -104,7 +104,7 @@ export async function deleteSkillFromGroup(
   _groupId: string,
   skillId: string,
 ): Promise<void> {
-  return invoke<void>('delete_skill_from_group', { skill_id: skillId });
+  return invoke<void>('delete_skill_from_group', { skillId });
 }
 
 // ─── Agents ──────────────────────────────────────────────────────
@@ -114,11 +114,11 @@ export async function getAgents(): Promise<AgentConfig[]> {
 }
 
 export async function addAgent(name: string, agentType: string, basePath: string): Promise<AgentConfig> {
-  return invoke<AgentConfig>('add_agent', { name, agent_type: agentType, base_path: basePath });
+  return invoke<AgentConfig>('add_agent', { name, agentType: agentType, basePath: basePath });
 }
 
 export async function updateAgent(id: string, name: string, agentType: string, basePath: string): Promise<void> {
-  return invoke<void>('update_agent', { id, name, agent_type: agentType, base_path: basePath });
+  return invoke<void>('update_agent', { id, name, agentType, basePath });
 }
 
 export async function deleteAgent(agentId: string): Promise<void> {
@@ -131,7 +131,7 @@ export async function deleteAgent(agentId: string): Promise<void> {
 interface RawMarketSkill {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   source: string;
   source_url: string | null;
   license: string | null;
@@ -164,10 +164,11 @@ function toMarketSkill(raw: RawMarketSkill): MarketSkill {
   return {
     id: raw.id,
     name: raw.name,
-    description: raw.description,
+    description: raw.description ?? '',
     version: raw.source,
     packageId: raw.id,
     author: raw.author ?? '',
+    skillContent: raw.skill_md_content ?? undefined,
     tags: raw.categories ?? [],
     category: raw.categories?.[0] ?? '',
     downloads: raw.install_count ?? 0,
@@ -183,21 +184,29 @@ function toMarketSkill(raw: RawMarketSkill): MarketSkill {
 export async function searchMarket(
   query: string,
   category?: string,
-): Promise<MarketSkill[]> {
-  const resp = await invoke<RawPaginatedResponse<RawMarketSkill>>('search_market', { query, category });
-  return resp.data.map(toMarketSkill);
+  page: number = 1,
+  perPage: number = 15,
+): Promise<{ skills: MarketSkill[]; total: number }> {
+  const resp = await invoke<RawPaginatedResponse<RawMarketSkill>>('search_market', { query, category, page, perPage });
+  return { skills: resp.data.map(toMarketSkill), total: resp.total };
 }
 
 export async function getSkillDetail(
   skillId: string,
 ): Promise<MarketSkill> {
-  const raw = await invoke<RawMarketSkill>('get_skill_detail', { skill_id: skillId });
+  const raw = await invoke<RawMarketSkill>('get_skill_detail', { skillId });
   return toMarketSkill(raw);
 }
 
 export async function getCategories(): Promise<string[]> {
   const cats = await invoke<RawCategory[]>('get_categories');
   return cats.map((c) => c.name);
+}
+
+// ─── Skill Content ────────────────────────────────────────────────
+
+export async function getSkillFileContent(skillId: string): Promise<string> {
+  return invoke<string>('get_skill_content', { skillId });
 }
 
 // ─── Conflict Resolution ──────────────────────────────────────────
@@ -210,7 +219,7 @@ export async function resolveSkillConflict(
   conflictId: string,
   keptCandidateId: string,
 ): Promise<void> {
-  return invoke<void>('resolve_skill_conflict', { conflict_id: conflictId, kept_candidate_id: keptCandidateId });
+  return invoke<void>('resolve_skill_conflict', { conflictId, keptCandidateId });
 }
 
 // ─── Settings ────────────────────────────────────────────────────
@@ -227,4 +236,10 @@ export async function updateSettings(
 
 export async function checkFirstRun(): Promise<boolean> {
   return invoke<boolean>('check_first_run');
+}
+
+// ─── Feedback ──────────────────────────────────────────────────
+
+export async function submitFeedback(title: string, description: string): Promise<void> {
+  return invoke<void>('submit_feedback', { title, description });
 }

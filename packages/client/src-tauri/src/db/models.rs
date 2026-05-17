@@ -128,6 +128,15 @@ pub struct ConflictCandidate {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Feedback {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SkillConflict {
     pub id: String,
     pub skill_name: String,

@@ -30,6 +30,7 @@ pub fn run() {
             commands::skill::uninstall_skill,
             commands::skill::update_skill,
             commands::skill::toggle_skill_enabled,
+            commands::skill::get_skill_content,
             commands::skill::apply_skill_to_agents,
             commands::skill::remove_skill_from_agents,
             commands::skill::scan_local_skills,
@@ -52,6 +53,7 @@ pub fn run() {
             commands::market::get_categories,
             commands::settings::get_settings,
             commands::settings::update_settings,
+            commands::feedback::submit_feedback,
             commands::settings::check_first_run,
         ])
         .run(tauri::generate_context!())

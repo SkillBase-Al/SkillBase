@@ -11,7 +11,11 @@ interface MarketState {
   isLoading: boolean;
   error: string | null;
   isEmpty: boolean;
-  search: (query: string, category?: string) => Promise<void>;
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  perPage: number;
+  search: (query: string, category?: string, page?: number, perPage?: number) => Promise<void>;
   fetchByCategory: (category: string) => Promise<void>;
 }
 
@@ -20,15 +24,27 @@ const useMarketStore = create<MarketState>((set, get) => ({
   categories: [],
   isLoading: false,
   error: null,
+  currentPage: 1,
+  totalPages: 1,
+  total: 0,
+  perPage: 15,
+
   get isEmpty() {
     return get().skills.length === 0 && !get().isLoading;
   },
 
-  search: async (query: string, category?: string) => {
-    set({ isLoading: true, error: null });
+  search: async (query: string, category?: string, page?: number, perPage?: number) => {
+    const p = page ?? 1;
+    const pp = perPage ?? get().perPage;
+    set({ isLoading: true, error: null, currentPage: p });
     try {
-      const skills = await searchMarket(query, category);
-      set({ skills, isLoading: false });
+      const result = await searchMarket(query, category, p, pp);
+      set({
+        skills: result.skills,
+        total: result.total,
+        totalPages: Math.max(1, Math.ceil(result.total / pp)),
+        isLoading: false,
+      });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to search market';
@@ -37,10 +53,15 @@ const useMarketStore = create<MarketState>((set, get) => ({
   },
 
   fetchByCategory: async (category: string) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, currentPage: 1 });
     try {
-      const skills = await searchMarket('', category);
-      set({ skills, isLoading: false });
+      const result = await searchMarket('', category, 1, get().perPage);
+      set({
+        skills: result.skills,
+        total: result.total,
+        totalPages: Math.max(1, Math.ceil(result.total / get().perPage)),
+        isLoading: false,
+      });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to fetch category';

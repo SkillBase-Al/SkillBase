@@ -18,7 +18,7 @@ interface AssessmentState {
   error: string | null;
   assessFormat: (skillId: string) => Promise<FormatResult>;
   assessSecurity: (skillId: string) => Promise<SecurityResult>;
-  batchAssess: (skillIds: string[]) => Promise<void>;
+  batchAssess: () => Promise<void>;
   fetchResults: (skillId?: string) => Promise<void>;
   clearResults: () => void;
 }

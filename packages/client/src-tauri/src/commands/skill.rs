@@ -60,6 +60,20 @@ fn scan_agent_paths(conn: &DbConn) -> Result<(), String> {
                         let existing_content = match fs::read_to_string(&existing_path) {
                             Ok(c) => c,
                             Err(_) => {
+                                // Stored path is stale — update skill_dir to the current location
+                                let new_skill_dir = s.path.parent().unwrap().to_string_lossy().to_string();
+                                let mut updated = skill.clone();
+                                updated.skill_dir = new_skill_dir;
+                                let _ = repository::insert_skill(conn, &updated);
+
+                                // Now try reading from the new location
+                                if let Ok(c) = fs::read_to_string(&s.path) {
+                                    if c == content {
+                                        repository::add_mapping(conn, &skill.id, &agent.id)?;
+                                        continue;
+                                    }
+                                    // Different content — will fall through to conflict handling
+                                }
                                 repository::add_mapping(conn, &skill.id, &agent.id)?;
                                 continue;
                             }
@@ -456,6 +470,15 @@ pub fn toggle_skill_enabled(conn: State<DbConn>, id: String, enabled: bool) -> R
 }
 
 #[tauri::command]
+pub fn get_skill_content(conn: State<DbConn>, skill_id: String) -> Result<String, String> {
+    let skill = repository::get_skill_by_id(&conn, &skill_id)?
+        .ok_or_else(|| "Skill not found".to_string())?;
+    let skill_md_path = Path::new(&skill.skill_dir).join("SKILL.md");
+    fs::read_to_string(&skill_md_path)
+        .map_err(|e| format!("Failed to read SKILL.md: {}", e))
+}
+
+#[tauri::command]
 pub fn scan_local_skills(conn: State<DbConn>, paths: Vec<String>) -> Result<Vec<InstalledSkill>, String> {
     // Collect all scanned skills (deduplicated by path)
     let mut all_scanned = crate::scanner::skill_scanner::scan_default()
@@ -521,6 +544,14 @@ pub fn scan_local_skills(conn: State<DbConn>, paths: Vec<String>) -> Result<Vec<
                 agent_ids: Vec::new(),
             };
             repository::insert_skill(&conn, &skill)?;
+        } else {
+            // Update existing skill's skill_dir in case the file was moved
+            let current_skill_dir = s.path.parent().unwrap().to_string_lossy().to_string();
+            if found.unwrap().skill_dir != current_skill_dir {
+                let mut updated = found.unwrap().clone();
+                updated.skill_dir = current_skill_dir;
+                repository::insert_skill(&conn, &updated)?;
+            }
         }
     }
 

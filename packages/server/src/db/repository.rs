@@ -1,5 +1,6 @@
 use crate::crawler::RawSkill;
 use crate::db::models::*;
+use chrono::NaiveDate;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -209,20 +210,23 @@ pub async fn search_skills(
         }
         (None, None) => {
             let total: i64 = sqlx::query_scalar(
-                "SELECT COUNT(*) FROM skills
-                 WHERE name ILIKE $1 OR description ILIKE $1 OR skill_md_content ILIKE $1",
+                "SELECT COUNT(*) FROM skills s
+                 JOIN skill_categories sc ON s.id = sc.skill_id
+                 WHERE s.name ILIKE $1 OR s.description ILIKE $1 OR s.skill_md_content ILIKE $1",
             )
             .bind(&search_pattern)
             .fetch_one(pool)
             .await?;
 
             let skills = sqlx::query_as::<_, Skill>(
-                "SELECT id, name, description, source, source_url, license, content_hash,
-                        skill_md_content, safety_level, format_score, quality_score, rating,
-                        install_count, created_at, updated_at
-                 FROM skills
-                 WHERE name ILIKE $1 OR description ILIKE $1 OR skill_md_content ILIKE $1
-                 ORDER BY created_at DESC
+                "SELECT s.id, s.name, s.description, s.source, s.source_url, s.license,
+                        s.content_hash, s.skill_md_content, s.safety_level,
+                        s.format_score, s.quality_score, s.rating, s.install_count,
+                        s.created_at, s.updated_at
+                 FROM skills s
+                 JOIN skill_categories sc ON s.id = sc.skill_id
+                 WHERE s.name ILIKE $1 OR s.description ILIKE $1 OR s.skill_md_content ILIKE $1
+                 ORDER BY s.created_at DESC
                  LIMIT $2 OFFSET $3",
             )
             .bind(&search_pattern)
@@ -374,4 +378,143 @@ pub async fn get_stats(pool: &PgPool) -> Result<Stats, sqlx::Error> {
     .await?;
 
     Ok(stats)
+}
+
+// --- Admin / Telemetry ---
+
+pub async fn upsert_dau(pool: &PgPool, ip: &str, date: NaiveDate) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "INSERT INTO daily_active_users (ip, date) VALUES ($1::inet, $2)
+         ON CONFLICT (ip, date) DO NOTHING",
+    )
+    .bind(ip)
+    .bind(date)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn insert_pageview(pool: &PgPool, ip: &str, page: &str) -> Result<(), sqlx::Error> {
+    sqlx::query("INSERT INTO page_views (ip, page) VALUES ($1::inet, $2)")
+        .bind(ip)
+        .bind(page)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn insert_feedback(
+    pool: &PgPool,
+    title: &str,
+    description: &str,
+    ip: Option<&str>,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "INSERT INTO feedback (title, description, submitter_ip) VALUES ($1, $2, $3)",
+    )
+    .bind(title)
+    .bind(description)
+    .bind(ip)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn get_dau(
+    pool: &PgPool,
+    from: NaiveDate,
+    to: NaiveDate,
+) -> Result<Vec<DauCount>, sqlx::Error> {
+    let rows = sqlx::query_as::<_, DauCount>(
+        "SELECT date, COUNT(DISTINCT ip)::bigint as count
+         FROM daily_active_users
+         WHERE date >= $1 AND date <= $2
+         GROUP BY date
+         ORDER BY date",
+    )
+    .bind(from)
+    .bind(to)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+pub async fn get_pageviews(
+    pool: &PgPool,
+    from: NaiveDate,
+    to: NaiveDate,
+) -> Result<Vec<PvCount>, sqlx::Error> {
+    let rows = sqlx::query_as::<_, PvCount>(
+        "SELECT viewed_at::date as date, COUNT(*)::bigint as count
+         FROM page_views
+         WHERE viewed_at >= $1 AND viewed_at < ($2::date + INTERVAL '1 day')
+         GROUP BY viewed_at::date
+         ORDER BY viewed_at::date",
+    )
+    .bind(from)
+    .bind(to)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+pub async fn get_page_ranking(
+    pool: &PgPool,
+    from: NaiveDate,
+    to: NaiveDate,
+    limit: i64,
+) -> Result<Vec<PageRank>, sqlx::Error> {
+    let rows = sqlx::query_as::<_, PageRank>(
+        "SELECT page, COUNT(*)::bigint as count
+         FROM page_views
+         WHERE viewed_at >= $1 AND viewed_at < ($2::date + INTERVAL '1 day')
+         GROUP BY page
+         ORDER BY count DESC
+         LIMIT $3",
+    )
+    .bind(from)
+    .bind(to)
+    .bind(limit)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+pub async fn list_feedback(pool: &PgPool) -> Result<Vec<Feedback>, sqlx::Error> {
+    let rows = sqlx::query_as::<_, Feedback>(
+        "SELECT id, title, description, submitter_ip, created_at
+         FROM feedback
+         ORDER BY created_at DESC",
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+pub async fn get_overview(
+    pool: &PgPool,
+    from: NaiveDate,
+    to: NaiveDate,
+) -> Result<Overview, sqlx::Error> {
+    let dau: i64 = sqlx::query_scalar(
+        "SELECT COUNT(DISTINCT ip)::bigint FROM daily_active_users WHERE date >= $1 AND date <= $2",
+    )
+    .bind(from)
+    .bind(to)
+    .fetch_one(pool)
+    .await?;
+
+    let pv: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*)::bigint FROM page_views WHERE viewed_at >= $1 AND viewed_at < ($2::date + INTERVAL '1 day')",
+    )
+    .bind(from)
+    .bind(to)
+    .fetch_one(pool)
+    .await?;
+
+    let total_feedback: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM feedback")
+        .fetch_one(pool)
+        .await?;
+
+    Ok(Overview { dau, pv, total_feedback })
 }

@@ -1,0 +1,1 @@
+ALTER TABLE feedback ALTER COLUMN submitter_ip TYPE TEXT;

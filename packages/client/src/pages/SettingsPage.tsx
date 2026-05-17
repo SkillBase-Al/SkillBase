@@ -12,6 +12,10 @@ import {
   Server,
   Brain,
   RefreshCw,
+  MessageSquare,
+  Send,
+  CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
@@ -23,7 +27,8 @@ import { AgentConfigForm } from '../components/agent/AgentConfigForm';
 import { LoadingSkeleton } from '../components/shared/LoadingSkeleton';
 import { useAgentStore } from '../stores/agentStore';
 import { useSettingsStore } from '../stores/settingsStore';
-import { scanLocalSkills } from '../services/tauri';
+import { scanLocalSkills, submitFeedback } from '../services/tauri';
+import { sendFeedbackToServer } from '../services/telemetry';
 import { useInstalledStore } from '../stores/installedStore';
 import type { AgentConfig } from '../types/agent';
 
@@ -46,10 +51,14 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = React.useState('agents');
   const [showAddForm, setShowAddForm] = React.useState(false);
   const [editingAgent, setEditingAgent] = React.useState<AgentConfig | null>(null);
-  const [serverUrl, setServerUrl] = React.useState('');
   const [proxyUrl, setProxyUrl] = React.useState('');
   const [autoScan, setAutoScan] = React.useState(false);
   const [autoAssess, setAutoAssess] = React.useState(false);
+  const [feedbackTitle, setFeedbackTitle] = React.useState('');
+  const [feedbackDescription, setFeedbackDescription] = React.useState('');
+  const [submittingFeedback, setSubmittingFeedback] = React.useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = React.useState(false);
+  const [feedbackError, setFeedbackError] = React.useState('');
 
   const { fetchItems: fetchInstalled, items: installedSkills } = useInstalledStore();
 
@@ -61,7 +70,6 @@ function SettingsPage() {
 
   React.useEffect(() => {
     if (settings) {
-      setServerUrl(settings.serverUrl ?? '');
       setProxyUrl(settings.proxyUrl ?? '');
       setAutoScan(settings.autoScan ?? false);
       setAutoAssess(settings.autoAssess ?? false);
@@ -123,7 +131,27 @@ function SettingsPage() {
   };
 
   const handleSaveNetwork = async () => {
-    await updateSettings({ serverUrl, proxyUrl });
+    await updateSettings({ proxyUrl });
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackTitle.trim() || !feedbackDescription.trim()) return;
+    setSubmittingFeedback(true);
+    setFeedbackError('');
+    const title = feedbackTitle.trim();
+    const desc = feedbackDescription.trim();
+    try {
+      await submitFeedback(title, desc);
+      // Also send to server for admin dashboard (fire-and-forget)
+      sendFeedbackToServer(title, desc);
+      setFeedbackSubmitted(true);
+      setFeedbackTitle('');
+      setFeedbackDescription('');
+    } catch (err) {
+      setFeedbackError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmittingFeedback(false);
+    }
   };
 
   return (
@@ -150,6 +178,10 @@ function SettingsPage() {
             <TabsTrigger value="network">
               <Network className="h-4 w-4 mr-1" />
               Network
+            </TabsTrigger>
+            <TabsTrigger value="feedback">
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Feedback
             </TabsTrigger>
             <TabsTrigger value="about">
               <Info className="h-4 w-4 mr-1" />
@@ -360,20 +392,6 @@ function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    <Server className="h-4 w-4 text-slate-400" />
-                    Server URL
-                  </label>
-                  <Input
-                    value={serverUrl}
-                    onChange={(e) => setServerUrl(e.target.value)}
-                    placeholder="https://api.skillbase.example.com"
-                  />
-                  <p className="text-xs text-slate-400">
-                    The URL of the SkillBase marketplace server
-                  </p>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <Globe className="h-4 w-4 text-slate-400" />
                     Proxy URL
                   </label>
@@ -389,6 +407,81 @@ function SettingsPage() {
                 <Button variant="default" size="sm" onClick={handleSaveNetwork}>
                   Save Network Settings
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Feedback Tab */}
+          <TabsContent value="feedback" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Send Feedback
+                </h3>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {feedbackSubmitted ? (
+                  <div className="flex flex-col items-center py-6 text-center">
+                    <CheckCircle2 className="h-10 w-10 text-green-500 mb-3" />
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Thank you for your feedback!
+                    </p>
+                    <p className="text-xs text-slate-500 mb-4">
+                      We value your input to help improve SkillBase.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFeedbackSubmitted(false)}
+                    >
+                      Send another
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Title
+                      </label>
+                      <Input
+                        value={feedbackTitle}
+                        onChange={(e) => setFeedbackTitle(e.target.value)}
+                        placeholder="Brief summary of your feedback"
+                        maxLength={200}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Description
+                      </label>
+                      <textarea
+                        value={feedbackDescription}
+                        onChange={(e) => setFeedbackDescription(e.target.value)}
+                        placeholder="Describe your feedback, suggestion, or issue in detail..."
+                        className="flex min-h-[120px] w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+                        maxLength={2000}
+                      />
+                    </div>
+                    {feedbackError && (
+                      <p className="text-xs text-red-500">
+                        {feedbackError}
+                      </p>
+                    )}
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleSubmitFeedback}
+                      disabled={!feedbackTitle.trim() || !feedbackDescription.trim() || submittingFeedback}
+                    >
+                      {submittingFeedback ? (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4 mr-1" />
+                      )}
+                      Submit Feedback
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

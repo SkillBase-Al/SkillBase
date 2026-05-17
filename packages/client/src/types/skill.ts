@@ -9,6 +9,7 @@ export interface Skill {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  skillContent?: string;
 }
 
 export interface InstalledSkill {
@@ -28,6 +29,7 @@ export interface InstalledSkill {
   updatedAt?: string;
   agentCount: number;
   agentIds: string[];
+  skillContent?: string;
 }
 
 export interface MarketSkill {
@@ -46,4 +48,5 @@ export interface MarketSkill {
   safetyLevel?: string;
   createdAt: string;
   updatedAt: string;
+  skillContent?: string;
 }

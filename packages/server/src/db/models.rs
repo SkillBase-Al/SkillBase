@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -59,4 +59,58 @@ pub struct PaginatedResponse<T> {
     pub total: i64,
     pub page: u32,
     pub per_page: u32,
+}
+
+// --- Admin / Telemetry ---
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct DailyActiveUser {
+    pub id: Uuid,
+    pub ip: String,
+    pub date: NaiveDate,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct PageView {
+    pub id: Uuid,
+    pub ip: String,
+    pub page: String,
+    pub viewed_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct Feedback {
+    pub id: Uuid,
+    pub title: String,
+    pub description: String,
+    #[serde(rename = "submitterIp")]
+    pub submitter_ip: Option<String>,
+    #[serde(rename = "createdAt")]
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct DauCount {
+    pub date: NaiveDate,
+    pub count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct PvCount {
+    pub date: NaiveDate,
+    pub count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct PageRank {
+    pub page: String,
+    pub count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Overview {
+    pub dau: i64,
+    pub pv: i64,
+    #[serde(rename = "totalFeedback")]
+    pub total_feedback: i64,
 }

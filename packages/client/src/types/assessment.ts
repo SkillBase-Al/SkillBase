@@ -40,6 +40,14 @@ export interface DepResult {
   assessedAt: string;
 }
 
+export interface AssessmentResultItem {
+  skillId: string;
+  skillName: string;
+  passed: boolean;
+  formatScore: number;
+  securityScore: number;
+}
+
 export interface AssessmentSummary {
   total: number;
   passed: number;
@@ -48,4 +56,12 @@ export interface AssessmentSummary {
   safe_count: number;
   warning_count: number;
   dangerous_count: number;
+  // Extended fields used by the dashboard
+  totalAssessed: number;
+  passedFormat: number;
+  passedSecurity: number;
+  totalIssues: number;
+  averageFormatScore: number;
+  averageSecurityScore: number;
+  results: AssessmentResultItem[];
 }

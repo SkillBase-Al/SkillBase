@@ -84,7 +84,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Bind address
     let host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
-    let port = std::env::var("SERVER_PORT").unwrap_or_else(|_| "3000".to_string());
+    let port = std::env::var("SERVER_PORT").unwrap_or_else(|_| "3007".to_string());
     let addr = format!("{}:{}", host, port);
 
     tracing::info!("Listening on {}", addr);
@@ -92,9 +92,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Start the server with graceful shutdown
     let listener = tokio::net::TcpListener::bind(&addr).await?;
 
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await?;
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await?;
 
     Ok(())
 }
