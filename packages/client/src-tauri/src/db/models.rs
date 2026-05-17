@@ -69,13 +69,9 @@ pub struct AppSettings {
     pub sidebar_collapsed: bool,
     #[serde(default)]
     pub first_run_complete: bool,
-    #[serde(default = "default_security_check")]
-    pub security_check_enabled: bool,
     #[serde(default = "default_crawl_repos")]
     pub crawl_repos: Vec<String>,
 }
-
-fn default_security_check() -> bool { true }
 
 fn default_crawl_repos() -> Vec<String> {
     vec!["anthropics/skills".to_string()]

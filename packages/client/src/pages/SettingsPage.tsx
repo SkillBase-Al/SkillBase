@@ -16,7 +16,6 @@ import {
   Send,
   CheckCircle2,
   Loader2,
-  Shield,
   GitFork,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
@@ -56,7 +55,6 @@ function SettingsPage() {
   const [proxyUrl, setProxyUrl] = React.useState('');
   const [autoScan, setAutoScan] = React.useState(false);
   const [autoAssess, setAutoAssess] = React.useState(false);
-  const [securityCheckEnabled, setSecurityCheckEnabled] = React.useState(true);
   const [crawlRepos, setCrawlRepos] = React.useState('');
   const [feedbackTitle, setFeedbackTitle] = React.useState('');
   const [feedbackDescription, setFeedbackDescription] = React.useState('');
@@ -77,7 +75,6 @@ function SettingsPage() {
       setProxyUrl(settings.proxyUrl ?? '');
       setAutoScan(settings.autoScan ?? false);
       setAutoAssess(settings.autoAssess ?? false);
-      setSecurityCheckEnabled(settings.securityCheckEnabled ?? true);
       setCrawlRepos((settings.crawlRepos ?? ['anthropics/skills']).join(', '));
     }
   }, [settings]);
@@ -387,24 +384,6 @@ function SettingsPage() {
                     onCheckedChange={(v) => {
                       setAutoAssess(v);
                       updateSettings({ autoAssess: v });
-                    }}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Shield className="h-4 w-4 text-slate-400" />
-                      Security check on import
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Scan for dangerous patterns (rm -rf, curl pipe, etc.) when importing
-                    </p>
-                  </div>
-                  <Switch
-                    checked={securityCheckEnabled}
-                    onCheckedChange={(v) => {
-                      setSecurityCheckEnabled(v);
-                      updateSettings({ securityCheckEnabled: v });
                     }}
                   />
                 </div>
