@@ -8,4 +8,6 @@ export interface AppSettings {
   sidebarCollapsed: boolean;
   lastUpdated: string | null;
   firstRunComplete: boolean;
+  securityCheckEnabled: boolean;
+  crawlRepos: string[];
 }

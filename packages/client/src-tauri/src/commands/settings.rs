@@ -23,6 +23,12 @@ pub fn get_settings(conn: State<DbConn>) -> Result<AppSettings, String> {
             .ok().flatten().map(|v| v == "true").unwrap_or(false),
         first_run_complete: repository::get_setting(&conn, "first_run_complete")
             .ok().flatten().map(|v| v == "true").unwrap_or(false),
+        security_check_enabled: repository::get_setting(&conn, "security_check_enabled")
+            .ok().flatten().map(|v| v == "true").unwrap_or(true),
+        crawl_repos: repository::get_setting(&conn, "crawl_repos")
+            .ok().flatten()
+            .map(|v| serde_json::from_str(&v).unwrap_or_default())
+            .unwrap_or_else(|| vec!["anthropics/skills".to_string()]),
     })
 }
 
@@ -38,6 +44,10 @@ pub fn update_settings(conn: State<DbConn>, settings: AppSettings) -> Result<App
     repository::set_setting(&conn, "first_run_complete", if settings.first_run_complete { "true" } else { "false" })?;
     if !settings.scan_paths.is_empty() {
         repository::set_setting(&conn, "scan_paths", &serde_json::to_string(&settings.scan_paths).unwrap_or_default())?;
+    }
+    repository::set_setting(&conn, "security_check_enabled", if settings.security_check_enabled { "true" } else { "false" })?;
+    if !settings.crawl_repos.is_empty() {
+        repository::set_setting(&conn, "crawl_repos", &serde_json::to_string(&settings.crawl_repos).unwrap_or_default())?;
     }
 
     Ok(settings)
