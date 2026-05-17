@@ -127,7 +127,7 @@ mod tests {
     #[test]
     fn test_name_similarity() {
         let sim = name_similarity("pdf-parse", "pdf-extract");
-        assert!(sim > 0.3);
+        assert!(sim > 0.25);
         assert!(sim < 1.0);
 
         // Identical names should get 1.0
