@@ -39,6 +39,11 @@ const agentPresets: Array<{
     defaultPaths: ['~/.claude/skills/'],
   },
   {
+    type: 'codex',
+    label: 'Codex',
+    defaultPaths: ['~/.codex/skills/'],
+  },
+  {
     type: 'windsurf',
     label: 'Windsurf',
     defaultPaths: ['~/.codeium/windsurf/global_workflows/'],

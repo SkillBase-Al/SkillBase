@@ -44,6 +44,14 @@ pub fn update_settings(conn: State<DbConn>, settings: AppSettings) -> Result<App
 }
 
 #[tauri::command]
+pub fn get_server_url(conn: State<DbConn>) -> Result<String, String> {
+    Ok(repository::get_setting(&conn, "server_url")
+        .ok().flatten()
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "http://localhost:3007".into()))
+}
+
+#[tauri::command]
 pub fn check_first_run(conn: State<DbConn>) -> Result<bool, String> {
     let agents = repository::get_all_agents(&conn)?;
     let skills = repository::get_all_skills(&conn)?;

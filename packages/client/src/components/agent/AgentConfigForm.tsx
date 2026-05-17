@@ -20,6 +20,7 @@ interface AgentConfigFormProps {
 const AGENT_TYPES: Array<{ value: string; label: string }> = [
   { value: 'cursor', label: 'Cursor' },
   { value: 'claude', label: 'Claude Code' },
+  { value: 'codex', label: 'Codex' },
   { value: 'windsurf', label: 'Windsurf' },
   { value: 'qoder', label: 'Qoder' },
   { value: 'opencode', label: 'OpenCode' },
@@ -29,6 +30,7 @@ const AGENT_TYPES: Array<{ value: string; label: string }> = [
 const AGENT_DEFAULT_PATHS: Record<string, string> = {
   cursor: '~/.cursor/skills/',
   claude: '~/.claude/skills/',
+  codex: '~/.codex/skills/',
   windsurf: '~/.codeium/windsurf/global_workflows/',
   qoder: '~/.qoder/skills;~/.agents/skills',
   opencode: '~/.config/opencode/skills/',

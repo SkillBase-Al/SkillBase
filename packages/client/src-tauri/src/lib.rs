@@ -54,6 +54,7 @@ pub fn run() {
             commands::settings::get_settings,
             commands::settings::update_settings,
             commands::feedback::submit_feedback,
+            commands::settings::get_server_url,
             commands::settings::check_first_run,
         ])
         .run(tauri::generate_context!())

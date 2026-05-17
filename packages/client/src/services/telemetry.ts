@@ -1,8 +1,21 @@
-const SERVER_URL = 'http://localhost:3007';
+import { invoke } from '@tauri-apps/api/core';
+
+let cachedUrl: string | null = null;
+
+async function getServerUrl(): Promise<string> {
+  if (cachedUrl) return cachedUrl;
+  try {
+    cachedUrl = await invoke<string>('get_server_url');
+  } catch {
+    cachedUrl = 'http://localhost:3007';
+  }
+  return cachedUrl;
+}
 
 async function post(path: string, body?: unknown) {
   try {
-    await fetch(`${SERVER_URL}${path}`, {
+    const url = await getServerUrl();
+    await fetch(`${url}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : undefined,

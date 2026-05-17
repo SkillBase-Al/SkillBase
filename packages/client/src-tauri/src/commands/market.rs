@@ -6,6 +6,13 @@ fn get_proxy_url(conn: &DbConn) -> Option<String> {
     repository::get_setting(conn, "proxy_url").ok().flatten()
 }
 
+fn get_server_url(conn: &DbConn) -> String {
+    repository::get_setting(conn, "server_url")
+        .ok().flatten()
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "http://localhost:3007".into())
+}
+
 /// Search the marketplace for skills
 #[tauri::command]
 pub async fn search_market(
@@ -15,7 +22,7 @@ pub async fn search_market(
     page: Option<i32>,
     per_page: Option<i32>,
 ) -> Result<PaginatedResponse<MarketSkill>, String> {
-    let base_url = std::env::var("SKILLBASE_API_URL").unwrap_or_else(|_| "http://localhost:3007".into());
+    let base_url = get_server_url(&conn);
     let proxy_url = get_proxy_url(&conn);
     let client = MarketClient::new(&base_url, proxy_url.as_deref());
 
@@ -33,7 +40,7 @@ pub async fn get_skill_detail(
     conn: State<'_, DbConn>,
     skill_id: String,
 ) -> Result<MarketSkill, String> {
-    let base_url = std::env::var("SKILLBASE_API_URL").unwrap_or_else(|_| "http://localhost:3007".into());
+    let base_url = get_server_url(&conn);
     let proxy_url = get_proxy_url(&conn);
     let client = MarketClient::new(&base_url, proxy_url.as_deref());
 
@@ -45,7 +52,7 @@ pub async fn get_skill_detail(
 pub async fn get_categories(
     conn: State<'_, DbConn>,
 ) -> Result<Vec<Category>, String> {
-    let base_url = std::env::var("SKILLBASE_API_URL").unwrap_or_else(|_| "http://localhost:3007".into());
+    let base_url = get_server_url(&conn);
     let proxy_url = get_proxy_url(&conn);
     let client = MarketClient::new(&base_url, proxy_url.as_deref());
 
