@@ -55,7 +55,7 @@ pub fn get_server_url(conn: State<DbConn>) -> Result<String, String> {
     Ok(repository::get_setting(&conn, "server_url")
         .ok().flatten()
         .filter(|s| !s.is_empty())
-        .unwrap_or_else(|| "http://localhost:3007".into()))
+        .unwrap_or_else(|| "https://skills.yy-crow.com".into()))
 }
 
 #[tauri::command]

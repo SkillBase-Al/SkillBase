@@ -52,6 +52,7 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = React.useState('agents');
   const [showAddForm, setShowAddForm] = React.useState(false);
   const [editingAgent, setEditingAgent] = React.useState<AgentConfig | null>(null);
+  const [serverUrl, setServerUrl] = React.useState('');
   const [proxyUrl, setProxyUrl] = React.useState('');
   const [autoScan, setAutoScan] = React.useState(false);
   const [autoAssess, setAutoAssess] = React.useState(false);
@@ -72,6 +73,7 @@ function SettingsPage() {
 
   React.useEffect(() => {
     if (settings) {
+      setServerUrl(settings.serverUrl ?? '');
       setProxyUrl(settings.proxyUrl ?? '');
       setAutoScan(settings.autoScan ?? false);
       setAutoAssess(settings.autoAssess ?? false);
@@ -134,7 +136,7 @@ function SettingsPage() {
   };
 
   const handleSaveNetwork = async () => {
-    await updateSettings({ proxyUrl });
+    await updateSettings({ serverUrl, proxyUrl });
   };
 
   const handleSaveCrawlRepos = async () => {
@@ -400,6 +402,20 @@ function SettingsPage() {
                 </h3>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <Server className="h-4 w-4 text-slate-400" />
+                    Server URL
+                  </label>
+                  <Input
+                    value={serverUrl}
+                    onChange={(e) => setServerUrl(e.target.value)}
+                    placeholder="https://skills.yy-crow.com"
+                  />
+                  <p className="text-xs text-slate-400">
+                    Backend API server address for skill marketplace (requires restart)
+                  </p>
+                </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <Globe className="h-4 w-4 text-slate-400" />
