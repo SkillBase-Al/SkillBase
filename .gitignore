@@ -25,3 +25,6 @@ packages/website/dist/
 
 # Admin SPA build output (rebuilt during deployment)
 packages/server/admin-dist/
+
+# Project-specific Claude Code instructions (machine-local)
+CLAUDE.md
