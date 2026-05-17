@@ -14,6 +14,7 @@ import { SkillDetail } from '../components/skill/SkillDetail';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { useToast } from '../components/ui/toast';
 import { useMarketStore } from '../stores/marketStore';
 import { useInstalledStore } from '../stores/installedStore';
 import { getCategories } from '../services/tauri';
@@ -22,7 +23,11 @@ import type { MarketSkill } from '../types/skill';
 function DiscoverPage() {
   const navigate = useNavigate();
   const { skills, categories, isLoading, error, search, currentPage, totalPages, total, perPage } = useMarketStore();
-  const { install } = useInstalledStore();
+  const { install, items: installedItems } = useInstalledStore();
+  const { addToast } = useToast();
+  const incrementDownloads = useMarketStore((s) => s.incrementDownloads);
+
+  const installedNames = React.useMemo(() => new Set(installedItems.map((s) => s.name)), [installedItems]);
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const [activeCategory, setActiveCategory] = React.useState('all');
@@ -65,6 +70,8 @@ function DiscoverPage() {
     if (!selectedSkill) return;
     try {
       await install(selectedSkill.packageId);
+      incrementDownloads(selectedSkill.packageId);
+      addToast(`"${selectedSkill.name}" installed successfully`, 'success');
       setDetailOpen(false);
     } catch {
       // Error handled by store
@@ -140,19 +147,28 @@ function DiscoverPage() {
           isLoading={isLoading}
           error={null}
           isEmpty={skills.length === 0 && !isLoading}
-          renderCard={(skill) => (
-            <SkillCard
-              skill={skill}
-              onClick={() => handleSkillClick(skill as MarketSkill)}
-              onInstall={() => {
-                const marketSkill = skill as MarketSkill;
-                if (!marketSkill.isInstalled) {
-                  install(marketSkill.packageId).catch(() => {});
-                }
-              }}
-              showInstallButton={!(skill as MarketSkill).isInstalled}
-            />
-          )}
+          renderCard={(skill) => {
+            const marketSkill = skill as MarketSkill;
+            const isInstalled = installedNames.has(marketSkill.name);
+            return (
+              <SkillCard
+                skill={skill}
+                onClick={() => handleSkillClick(marketSkill)}
+                onInstall={async () => {
+                  if (!isInstalled) {
+                    try {
+                      await install(marketSkill.packageId);
+                      incrementDownloads(marketSkill.packageId);
+                      addToast(`"${marketSkill.name}" installed successfully`, 'success');
+                    } catch {
+                      // Error handled by store
+                    }
+                  }
+                }}
+                showInstallButton={!isInstalled}
+              />
+            );
+          }}
         />
 
         {/* Pagination */}
@@ -221,7 +237,7 @@ function DiscoverPage() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         onInstall={handleInstall}
-        isInstalled={selectedSkill?.isInstalled ?? false}
+        isInstalled={selectedSkill ? installedNames.has(selectedSkill.name) : false}
       />
     </div>
   );

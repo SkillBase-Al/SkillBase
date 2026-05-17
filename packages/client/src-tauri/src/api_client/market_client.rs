@@ -68,6 +68,12 @@ pub struct MarketClient {
     client: reqwest::Client,
 }
 
+/// Wrapper for the server's `GET /api/v1/skills/:id` response which nests the skill.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct SkillDetailResponse {
+    skill: MarketSkill,
+}
+
 impl MarketClient {
     pub fn new(base_url: &str, proxy_url: Option<&str>) -> Self {
         let mut builder = reqwest::Client::builder()
@@ -146,9 +152,11 @@ impl MarketClient {
             .await
             .map_err(|e| format!("Detail request failed: {}", e))?;
 
-        resp.json::<MarketSkill>()
+        let wrapped = resp.json::<SkillDetailResponse>()
             .await
-            .map_err(|e| format!("Detail parse failed: {}", e))
+            .map_err(|e| format!("Detail parse failed: {}", e))?;
+
+        Ok(wrapped.skill)
     }
 
     pub async fn get_categories(&self) -> Result<Vec<Category>, String> {

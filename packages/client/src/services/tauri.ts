@@ -23,12 +23,12 @@ export async function installSkill(skillId: string): Promise<InstalledSkill> {
   return invoke<InstalledSkill>('install_skill', {
     name: detail.name,
     description: detail.description,
-    source: detail.version || 'unknown',
+    source: detail.source || 'unknown',
     sourceUrl: null,
     version: detail.version || null,
     license: null,
     author: detail.author || null,
-    skillContent: '',
+    skillContent: detail.skillContent ?? '',
     agentIds: [],
   });
 }

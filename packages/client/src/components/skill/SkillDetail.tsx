@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Package,
-  Clock,
   User,
   Tag,
   Shield,
@@ -298,13 +297,6 @@ function SkillDetail({
 
           {/* Metadata */}
           <div className="flex items-center gap-3 text-sm">
-            <div className="flex items-center gap-2 text-slate-500">
-              <Clock className="h-4 w-4" />
-              <span>
-                Updated:{' '}
-                {skill.updatedAt ? new Date(skill.updatedAt).toLocaleDateString() : 'N/A'}
-              </span>
-            </div>
             {isInstalled && isInstalledSkill(skill) && (
               <div className="flex items-center gap-2 text-slate-500">
                 <Package className="h-4 w-4" />

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Package, Star, Shield } from 'lucide-react';
+import { Package, Shield } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
@@ -92,10 +92,6 @@ function SkillCard({
 
         {isMarketSkill(skill) && (
           <div className="flex items-center gap-3 text-xs text-slate-400">
-            <span className="flex items-center gap-1">
-              <Star className="h-3 w-3 text-yellow-500" />
-              {skill.rating.toFixed(1)}
-            </span>
             <span>{skill.downloads} downloads</span>
           </div>
         )}

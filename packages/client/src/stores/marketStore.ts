@@ -17,6 +17,7 @@ interface MarketState {
   perPage: number;
   search: (query: string, category?: string, page?: number, perPage?: number) => Promise<void>;
   fetchByCategory: (category: string) => Promise<void>;
+  incrementDownloads: (packageId: string) => void;
 }
 
 const useMarketStore = create<MarketState>((set, get) => ({
@@ -67,6 +68,14 @@ const useMarketStore = create<MarketState>((set, get) => ({
         err instanceof Error ? err.message : 'Failed to fetch category';
       set({ error: message, isLoading: false });
     }
+  },
+
+  incrementDownloads: (packageId: string) => {
+    set((state) => ({
+      skills: state.skills.map((s) =>
+        s.packageId === packageId ? { ...s, downloads: s.downloads + 1 } : s,
+      ),
+    }));
   },
 }));
 

@@ -5,6 +5,7 @@ import {
   installSkill as apiInstall,
   uninstallSkill as apiUninstall,
   toggleSkillEnabled as apiToggle,
+  batchAssess,
 } from '../services/tauri';
 
 interface InstalledState {
@@ -46,6 +47,8 @@ const useInstalledStore = create<InstalledState>((set, get) => ({
         items: [...state.items, skill],
         isLoading: false,
       }));
+      // Run assessments on all skills after a new install
+      batchAssess().catch(() => {});
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to install skill';
