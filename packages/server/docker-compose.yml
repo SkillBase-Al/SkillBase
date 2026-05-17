@@ -32,7 +32,7 @@ services:
       LLM_MODEL: "${LLM_MODEL:-gpt-4o-mini}"
       LLM_BASE_URL: "${LLM_BASE_URL:-https://api.openai.com/v1}"
       ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-happyBO88}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin}"
       ADMIN_DIST_DIR: ./admin-dist
       RUST_LOG: info
     depends_on:

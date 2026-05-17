@@ -311,7 +311,7 @@ pub async fn admin_login(
     Json(body): Json<LoginRequest>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let username = std::env::var("ADMIN_USERNAME").unwrap_or_else(|_| "admin".into());
-    let password = std::env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "happyBO88".into());
+    let password = std::env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "admin".into());
 
     if body.username != username || body.password != password {
         return Err(AppError::Unauthorized("Invalid credentials".into()));
