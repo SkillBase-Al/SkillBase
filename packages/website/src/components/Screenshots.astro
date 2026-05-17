@@ -17,12 +17,61 @@ const { locale, t } = Astro.props;
 
     <!-- Screenshot grid -->
     <div class="grid sm:grid-cols-2 gap-6">
-      <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+      <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer hover:shadow-lg transition-shadow screenshot-thumb">
         <img src="/screenshot-1.png" alt="SkillBase Discover" class="w-full h-auto" loading="lazy" />
       </div>
-      <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+      <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer hover:shadow-lg transition-shadow screenshot-thumb">
         <img src="/screenshot-2.png" alt="SkillBase Detail" class="w-full h-auto" loading="lazy" />
       </div>
     </div>
   </div>
 </section>
+
+<!-- Lightbox overlay -->
+<div id="lightbox" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 hidden cursor-pointer">
+  <button id="lightbox-close" class="absolute top-4 right-4 text-white/80 hover:text-white text-4xl leading-none w-10 h-10 flex items-center justify-center">&times;</button>
+  <img id="lightbox-img" class="max-w-full max-h-full object-contain rounded-lg cursor-default" src="" alt="" />
+</div>
+
+<style>
+  #lightbox {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  #lightbox:not(.hidden) {
+    opacity: 1;
+  }
+  #lightbox.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  (function() {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+
+    document.querySelectorAll('.screenshot-thumb').forEach(el => {
+      el.addEventListener('click', () => {
+        const img = el.querySelector('img');
+        if (!img) return;
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.remove('hidden');
+      });
+    });
+
+    function closeLightbox() {
+      lightbox.classList.add('hidden');
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  })();
+</script>

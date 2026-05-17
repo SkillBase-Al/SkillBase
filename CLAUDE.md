@@ -109,4 +109,4 @@ The project is in early scaffolding phase (M0). The plan has 6 milestones:
 - **State handling**: Every UI component covers loading (skeleton), empty, error, and success states
 
 ## 安装依赖以及下载依赖包
-尽可能使用国内镜像去下载，
+尽可能使用国内镜像去下载
