@@ -400,6 +400,16 @@ pub async fn admin_feedback(
     Ok(Json(rows))
 }
 
+/// GET /api/v1/admin/skills?page=1&per_page=20
+pub async fn admin_skills(
+    State(state): State<AppState>,
+    Query(params): Query<PaginationParams>,
+) -> Result<Json<PaginatedResponse<Skill>>, AppError> {
+    let (page, per_page) = validate_pagination(params.page, params.per_page);
+    let result = repository::list_skills(&state.db, page, per_page, None, None, None).await?;
+    Ok(Json(result))
+}
+
 /// POST /api/v1/assess
 ///
 /// Sends skill content to the configured LLM provider for quality assessment.

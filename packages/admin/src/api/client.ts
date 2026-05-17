@@ -107,6 +107,36 @@ export function getFeedback() {
   return request<Feedback[]>('/api/v1/admin/feedback');
 }
 
+// --- Skills ---
+
+export interface AdminSkill {
+  id: string;
+  name: string;
+  description: string | null;
+  source: string;
+  source_url: string | null;
+  license: string | null;
+  safety_level: string | null;
+  format_score: number | null;
+  quality_score: number | null;
+  rating: number | null;
+  install_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaginatedSkills {
+  data: AdminSkill[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export function getSkills(page = 1, perPage = 20) {
+  const params = new URLSearchParams({ page: String(page), per_page: String(perPage) });
+  return request<PaginatedSkills>(`/api/v1/admin/skills?${params}`);
+}
+
 export function sendHeartbeat() {
   return request<{ status: string }>('/api/v1/telemetry/heartbeat', { method: 'POST' });
 }

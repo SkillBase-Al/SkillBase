@@ -83,6 +83,11 @@ function SkillCard({
         </p>
 
         <div className="flex flex-wrap gap-1.5 mb-2">
+          {'source' in skill && skill.source && skill.source !== 'github' && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-blue-200 text-blue-700">
+              {skill.source.split('/').pop()}
+            </Badge>
+          )}
           {skill.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0">
               {tag}

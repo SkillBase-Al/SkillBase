@@ -37,6 +37,7 @@ pub fn build_router(
         .route("/stats/pageviews", get(handlers::admin_pageviews))
         .route("/stats/pages", get(handlers::admin_page_ranking))
         .route("/feedback", get(handlers::admin_feedback))
+        .route("/skills", get(handlers::admin_skills))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             handlers::admin_auth,

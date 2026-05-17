@@ -119,7 +119,7 @@ pub async fn fetch_skills() -> Result<Vec<RawSkill>, Box<dyn std::error::Error +
                 let skill = RawSkill::new(
                     format!("{}/{}", item.repository.full_name, item.path),
                     None,
-                    "github".to_string(),
+                    item.repository.full_name.clone(), // e.g. "SkillBase-Al/skill-hub"
                     Some(item.html_url.clone()),
                     license,
                     content,

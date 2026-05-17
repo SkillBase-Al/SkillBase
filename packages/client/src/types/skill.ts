@@ -39,6 +39,7 @@ export interface MarketSkill {
   version: string;
   packageId: string;
   author: string;
+  source: string;
   tags: string[];
   category: string;
   downloads: number;
