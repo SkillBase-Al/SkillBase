@@ -1,14 +1,13 @@
-version: "3.8"
-
 services:
   db:
     image: pgvector/pgvector:pg16
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: skillbase
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -19,17 +18,22 @@ services:
 
   api:
     build: .
+    restart: always
     ports:
-      - "3007:3007"
+      - "127.0.0.1:3007:3007"
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/skillbase
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_TOKEN: "${GITHUB_TOKEN}"
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: "3007"
-      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
-      LLM_API_KEY: ${LLM_API_KEY}
-      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_PROVIDER: "${LLM_PROVIDER:-openai}"
+      LLM_API_KEY: "${LLM_API_KEY}"
+      LLM_MODEL: "${LLM_MODEL:-gpt-4o-mini}"
+      LLM_BASE_URL: "${LLM_BASE_URL:-https://api.openai.com/v1}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-happyBO88}"
+      ADMIN_DIST_DIR: ./admin-dist
+      RUST_LOG: info
     depends_on:
       db:
         condition: service_healthy

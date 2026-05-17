@@ -62,7 +62,10 @@ pub fn build_router(
         .route("/api/v1/admin/login", post(handlers::admin_login))
         // Admin API (auth required)
         .nest("/api/v1/admin", admin_api)
-        // Admin SPA static files
-        .nest_service("/admin", ServeDir::new("../admin/dist"))
+        // Admin SPA static files (configurable via ADMIN_DIST_DIR env var)
+        .nest_service(
+            "/admin",
+            ServeDir::new(std::env::var("ADMIN_DIST_DIR").unwrap_or_else(|_| "../admin/dist".into())),
+        )
         .with_state(state)
 }

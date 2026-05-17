@@ -46,8 +46,8 @@ const platforms = [
                 : (p.id === 'macos' ? '.dmg' : p.id === 'windows' ? '.exe' : '.deb/.AppImage')
             }</p>
             <a
-              href="#"
-              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition-colors opacity-50 pointer-events-none"
+              href="/downloads/SkillBase_0.1.0_aarch64.dmg"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition-colors"
               data-download-link={p.id}
             >
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,15 +101,11 @@ const platforms = [
         const platformId = card.dataset.platform;
         const link = card.querySelector('[data-download-link]');
         if (link) {
-          // Placeholder: replace with actual download URL
           const urls = {
-            macos: '#',
+            macos: '/downloads/SkillBase_0.1.0_aarch64.dmg',
             windows: '#',
             linux: '#'
           };
-          // In real usage: window.location.href = urls[platformId];
-          // For now show the download button is active
-          link.classList.remove('opacity-50', 'pointer-events-none');
           link.href = urls[platformId] || '#';
         }
       });
