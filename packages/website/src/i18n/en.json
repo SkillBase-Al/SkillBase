@@ -82,7 +82,7 @@
   "download": {
     "title": "Download SkillBase",
     "subtitle": "Free and open source. Available for macOS, Windows, and Linux.",
-    "version": "v0.1.3",
+    "version": "v0.1.4",
     "macos": "macOS",
     "windows": "Windows",
     "linux": "Linux",

@@ -10,10 +10,11 @@ fn get_server_url(conn: &DbConn) -> String {
     repository::get_setting(conn, "server_url")
         .ok().flatten()
         .filter(|s| !s.is_empty())
-        .unwrap_or_else(|| "https://skills.yy-crow.com".into())
+        .unwrap_or_else(|| "http://skills.yy-crow.com".into())
 }
 
-/// Search the marketplace for skills
+/// Search the marketplace for skills.
+/// When the query is empty, falls back to the list endpoint to return all skills.
 #[tauri::command]
 pub async fn search_market(
     conn: State<'_, DbConn>,
@@ -26,12 +27,22 @@ pub async fn search_market(
     let proxy_url = get_proxy_url(&conn);
     let client = MarketClient::new(&base_url, proxy_url.as_deref());
 
-    client.search_skills(
-        &query,
-        category.as_deref(),
-        page.unwrap_or(1),
-        per_page.unwrap_or(20),
-    ).await
+    if query.trim().is_empty() {
+        // No search query — use the list endpoint which returns all skills
+        client.list_skills(
+            page.unwrap_or(1),
+            per_page.unwrap_or(20),
+            category.as_deref(),
+            None,
+        ).await
+    } else {
+        client.search_skills(
+            &query,
+            category.as_deref(),
+            page.unwrap_or(1),
+            per_page.unwrap_or(20),
+        ).await
+    }
 }
 
 /// Get skill detail from marketplace

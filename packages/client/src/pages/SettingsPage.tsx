@@ -410,7 +410,7 @@ function SettingsPage() {
                   <Input
                     value={serverUrl}
                     onChange={(e) => setServerUrl(e.target.value)}
-                    placeholder="https://skills.yy-crow.com"
+                    placeholder="http://skills.yy-crow.com"
                   />
                   <p className="text-xs text-slate-400">
                     Backend API server address for skill marketplace (requires restart)

@@ -160,17 +160,45 @@ interface RawCategory {
   display_name: string;
 }
 
+/** Parse the skill name from SKILL.md YAML frontmatter, falling back to the path. */
+function parseSkillName(rawName: string, content?: string | null): string {
+  if (content) {
+    const match = content.match(/^---\s*\nname:\s*(.+)/);
+    if (match) return match[1].trim();
+  }
+  // Fallback: extract the directory name before "/SKILL.md"
+  const idx = rawName.lastIndexOf('/');
+  if (idx !== -1) {
+    const parent = rawName.lastIndexOf('/', idx - 1);
+    return rawName.slice(parent !== -1 ? parent + 1 : 0, idx);
+  }
+  return rawName;
+}
+
+/** Parse the skill description from SKILL.md YAML frontmatter. */
+function parseDescription(rawDescription: string | null, content?: string | null): string {
+  if (rawDescription) return rawDescription;
+  if (content) {
+    const match = content.match(/^description:\s*"(.+)"\s*$/m);
+    if (match) return match[1];
+    const simple = content.match(/^description:\s*(.+)$/m);
+    if (simple) return simple[1];
+  }
+  return '';
+}
+
 function toMarketSkill(raw: RawMarketSkill): MarketSkill {
+  const skillContent = raw.skill_md_content ?? undefined;
   return {
     id: raw.id,
-    name: raw.name,
-    description: raw.description ?? '',
+    name: parseSkillName(raw.name, skillContent),
+    description: parseDescription(raw.description, skillContent),
     version: '',
     source: raw.source,
     packageId: raw.id,
     author: raw.author ?? '',
-    skillContent: raw.skill_md_content ?? undefined,
-    tags: raw.categories ?? [],
+    skillContent,
+    tags: raw.source ? [raw.source] : [],
     category: raw.categories?.[0] ?? '',
     downloads: raw.install_count ?? 0,
     rating: raw.rating ?? 0,
