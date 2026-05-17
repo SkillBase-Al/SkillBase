@@ -22,3 +22,6 @@ packages/server/.env
 packages/website/dist/
 # Claude Code local settings
 .claude/
+
+# Admin SPA build output (rebuilt during deployment)
+packages/server/admin-dist/
