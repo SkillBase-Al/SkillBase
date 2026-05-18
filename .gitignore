@@ -31,6 +31,12 @@ CLAUDE.md
 
 # Release build artifacts
 release/
+
+# Playwright MCP screenshots
+.playwright-mcp/
+
+# Promotional materials (not checked into git)
+promotion/
 packages/website/public/downloads/*.dmg
 packages/website/public/downloads/*.exe
 packages/website/public/downloads/*.AppImage

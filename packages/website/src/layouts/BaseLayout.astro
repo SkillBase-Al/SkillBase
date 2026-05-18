@@ -78,5 +78,73 @@ const ogImage = `${siteUrl}/og-image.png`;
   </head>
   <body>
     <slot />
+
+    <script>
+      // Fetch latest release info from API and update dynamic elements
+      (async function() {
+        try {
+          const res = await fetch('/api/v1/downloads');
+          const data = await res.json();
+          const version = data.version;
+
+          // Update version badge in Hero section
+          const badge = document.getElementById('version-badge');
+          if (badge) {
+            badge.textContent = `v${version} — Open Source`;
+          }
+
+          // Update version badges
+          document.querySelectorAll('[data-version]').forEach(el => {
+            el.textContent = `v${version}`;
+          });
+
+          // Update structured data version
+          document.querySelectorAll('script[type="application/ld+json"]').forEach(el => {
+            try {
+              const json = JSON.parse(el.textContent || '{}');
+              if (json.version) {
+                json.version = version;
+                el.textContent = JSON.stringify(json);
+              }
+            } catch {}
+          });
+
+          // Update download links with real GitHub release URLs
+          if (data.downloads && data.downloads.length > 0) {
+            // Map platform ID to attribute lookup
+            var platformMap = {};
+            data.downloads.forEach(function(d) { platformMap[d.platform] = d; });
+
+            // Update each download link card
+            document.querySelectorAll('[data-platform]').forEach(function(card) {
+              var platform = card.getAttribute('data-platform');
+              var link = card.querySelector('[data-download-link]');
+              // Platform IDs from Download.astro: macos, windows, linux
+              // APIs return macos, windows-exe, windows-msi, linux-appimage, linux-deb
+              var download = platformMap[platform] || platformMap[platform + '-exe'] || platformMap[platform + '-appimage'] || platformMap[platform + '-deb'];
+              if (download && link) {
+                link.setAttribute('href', download.url);
+              }
+            });
+          }
+        } catch (e) {
+          // Fallback: try version-only endpoint
+          try {
+            var r2 = await fetch('/api/v1/version');
+            var d2 = await r2.json();
+            var ver = d2.version;
+            var badgeEl = document.getElementById('version-badge');
+            if (badgeEl) badgeEl.textContent = 'v' + ver + ' — Open Source';
+            document.querySelectorAll('[data-version]').forEach(function(el) { el.textContent = 'v' + ver; });
+            document.querySelectorAll('[data-version-url]').forEach(function(el) {
+              var tpl = el.getAttribute('data-version-url');
+              if (tpl) el.setAttribute('href', tpl.replace(/\{version\}/g, ver));
+            });
+          } catch(e2) {
+            console.warn('Failed to fetch version info, using fallback', e2);
+          }
+        }
+      })();
+    </script>
   </body>
 </html>

@@ -45,6 +45,8 @@ pub fn build_router(
 
     Router::new()
         .route("/api/v1/health", get(handlers::health))
+        .route("/api/v1/version", get(handlers::version))
+        .route("/api/v1/downloads", get(handlers::downloads))
         .route("/api/v1/stats", get(handlers::stats))
         .route("/api/v1/skills", get(handlers::list_skills))
         .route("/api/v1/skills/search", get(handlers::search_skills))

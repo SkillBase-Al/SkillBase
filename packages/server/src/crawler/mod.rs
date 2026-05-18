@@ -1,4 +1,3 @@
-pub mod github_adapter;
 pub mod scheduler;
 pub mod skillnet_adapter;
 
@@ -15,6 +14,7 @@ pub struct RawSkill {
     pub license: Option<String>,
     pub content: String,
     pub content_hash: String,
+    pub rating: Option<f64>,
 }
 
 impl RawSkill {
@@ -40,6 +40,7 @@ impl RawSkill {
             license,
             content,
             content_hash,
+            rating: None,
         }
     }
 }
@@ -47,16 +48,6 @@ impl RawSkill {
 /// Run all crawler adapters and collect raw skills.
 pub async fn crawl_all() -> Vec<RawSkill> {
     let mut all_skills = Vec::new();
-
-    match github_adapter::fetch_skills().await {
-        Ok(skills) => {
-            tracing::info!("GitHub adapter returned {} skills", skills.len());
-            all_skills.extend(skills);
-        }
-        Err(e) => {
-            tracing::error!("GitHub adapter error: {}", e);
-        }
-    }
 
     match skillnet_adapter::fetch_skills().await {
         Ok(skills) => {

@@ -13,10 +13,9 @@ import {
   Brain,
   RefreshCw,
   MessageSquare,
-  Send,
   CheckCircle2,
   Loader2,
-  GitFork,
+  Send,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
@@ -52,11 +51,10 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = React.useState('agents');
   const [showAddForm, setShowAddForm] = React.useState(false);
   const [editingAgent, setEditingAgent] = React.useState<AgentConfig | null>(null);
-  const [serverUrl, setServerUrl] = React.useState('');
+  const [serverUrl] = React.useState('');
   const [proxyUrl, setProxyUrl] = React.useState('');
   const [autoScan, setAutoScan] = React.useState(false);
   const [autoAssess, setAutoAssess] = React.useState(false);
-  const [crawlRepos, setCrawlRepos] = React.useState('');
   const [feedbackTitle, setFeedbackTitle] = React.useState('');
   const [feedbackDescription, setFeedbackDescription] = React.useState('');
   const [submittingFeedback, setSubmittingFeedback] = React.useState(false);
@@ -73,11 +71,9 @@ function SettingsPage() {
 
   React.useEffect(() => {
     if (settings) {
-      setServerUrl(settings.serverUrl ?? '');
       setProxyUrl(settings.proxyUrl ?? '');
       setAutoScan(settings.autoScan ?? false);
       setAutoAssess(settings.autoAssess ?? false);
-      setCrawlRepos((settings.crawlRepos ?? ['anthropics/skills']).join(', '));
     }
   }, [settings]);
 
@@ -136,14 +132,7 @@ function SettingsPage() {
   };
 
   const handleSaveNetwork = async () => {
-    await updateSettings({ serverUrl, proxyUrl });
-  };
-
-  const handleSaveCrawlRepos = async () => {
-    const repos = crawlRepos.split(',')
-      .map(r => r.trim())
-      .filter(Boolean);
-    await updateSettings({ crawlRepos: repos.length > 0 ? repos : ['anthropics/skills'] });
+    await updateSettings({ proxyUrl });
   };
 
   const handleSubmitFeedback = async () => {
@@ -402,19 +391,14 @@ function SettingsPage() {
                 </h3>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    <Server className="h-4 w-4 text-slate-400" />
-                    Server URL
-                  </label>
-                  <Input
-                    value={serverUrl}
-                    onChange={(e) => setServerUrl(e.target.value)}
-                    placeholder="http://skills.yy-crow.com"
-                  />
-                  <p className="text-xs text-slate-400">
-                    Backend API server address for skill marketplace (requires restart)
-                  </p>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-900">
+                  <Server className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-slate-500">Server URL</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                      {settings?.serverUrl || 'http://skills.yy-crow.com'}
+                    </p>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -432,36 +416,6 @@ function SettingsPage() {
                 </div>
                 <Button variant="default" size="sm" onClick={handleSaveNetwork}>
                   Save Network Settings
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <GitFork className="h-4 w-4 text-slate-400" />
-                  Crawl Sources
-                </h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    GitHub Repositories
-                  </label>
-                  <Input
-                    value={crawlRepos}
-                    onChange={(e) => setCrawlRepos(e.target.value)}
-                    placeholder="anthropics/skills, owner2/repo2"
-                  />
-                  <p className="text-xs text-slate-400">
-                    Comma-separated list of GitHub repos (owner/repo) to crawl for SKILL.md files
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    Default: <code className="text-blue-600 bg-blue-50 px-1 rounded">anthropics/skills</code>
-                  </p>
-                </div>
-                <Button variant="default" size="sm" onClick={handleSaveCrawlRepos}>
-                  Save Crawl Sources
                 </Button>
               </CardContent>
             </Card>

@@ -320,8 +320,8 @@ pub async fn get_categories(pool: &PgPool) -> Result<Vec<Category>, sqlx::Error>
 
 pub async fn upsert_skill(pool: &PgPool, raw: &RawSkill) -> Result<Skill, sqlx::Error> {
     let skill = sqlx::query_as::<_, Skill>(
-        "INSERT INTO skills (name, description, source, source_url, license, content_hash, skill_md_content)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        "INSERT INTO skills (name, description, source, source_url, license, content_hash, skill_md_content, rating)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          ON CONFLICT (content_hash)
          DO UPDATE SET
              name = EXCLUDED.name,
@@ -329,6 +329,7 @@ pub async fn upsert_skill(pool: &PgPool, raw: &RawSkill) -> Result<Skill, sqlx::
              source_url = EXCLUDED.source_url,
              skill_md_content = EXCLUDED.skill_md_content,
              license = EXCLUDED.license,
+             rating = COALESCE(EXCLUDED.rating, skills.rating),
              updated_at = NOW()
          RETURNING id, name, description, source, source_url, license, content_hash,
                    skill_md_content, safety_level, format_score, quality_score, rating,
@@ -341,6 +342,7 @@ pub async fn upsert_skill(pool: &PgPool, raw: &RawSkill) -> Result<Skill, sqlx::
     .bind(&raw.license)
     .bind(&raw.content_hash)
     .bind(&raw.content)
+    .bind(&raw.rating)
     .fetch_one(pool)
     .await?;
 

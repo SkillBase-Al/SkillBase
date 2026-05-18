@@ -137,6 +137,10 @@ export function getSkills(page = 1, perPage = 20) {
   return request<PaginatedSkills>(`/api/v1/admin/skills?${params}`);
 }
 
+export function triggerCrawl() {
+  return request<{ message: string }>('/api/v1/crawl/trigger', { method: 'POST' });
+}
+
 export function sendHeartbeat() {
   return request<{ status: string }>('/api/v1/telemetry/heartbeat', { method: 'POST' });
 }

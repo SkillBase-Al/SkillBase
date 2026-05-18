@@ -4,7 +4,8 @@ import {
   BarChart, Bar,
 } from 'recharts';
 import {
-  getOverview, getDau, getPageviews, getPageRanking, getFeedback, getSkills, clearToken,
+  getOverview, getDau, getPageviews, getPageRanking, getFeedback, getSkills,
+  triggerCrawl, clearToken,
   type Overview, type DauCount, type PvCount, type PageRank, type Feedback,
   type AdminSkill, type PaginatedSkills,
 } from '../api/client';
@@ -31,6 +32,8 @@ export default function Dashboard() {
   const [loading, setLoading] = React.useState(true);
   const [tab, setTab] = React.useState<'overview' | 'feedback' | 'skills'>('overview');
   const [skillsPage, setSkillsPage] = React.useState(1);
+  const [crawling, setCrawling] = React.useState(false);
+  const [crawlMsg, setCrawlMsg] = React.useState<string | null>(null);
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -79,6 +82,30 @@ export default function Dashboard() {
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-slate-800">SkillBase Admin</h1>
         <div className="flex items-center gap-3 text-sm">
+          {crawlMsg && (
+            <span className={`text-xs ${crawlMsg.includes('success') ? 'text-green-600' : 'text-red-500'}`}>
+              {crawlMsg}
+            </span>
+          )}
+          <button
+            onClick={async () => {
+              setCrawling(true);
+              setCrawlMsg(null);
+              try {
+                const res = await triggerCrawl();
+                setCrawlMsg(res.message);
+                setTimeout(() => setCrawlMsg(null), 3000);
+              } catch (e) {
+                setCrawlMsg('Crawl failed');
+              } finally {
+                setCrawling(false);
+              }
+            }}
+            disabled={crawling}
+            className="bg-amber-500 text-white px-3 py-1.5 rounded text-sm hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {crawling ? 'Crawling...' : 'Trigger Crawl'}
+          </button>
           <button onClick={() => { clearToken(); window.location.reload(); }}
             className="text-slate-400 hover:text-slate-600">
             Logout

@@ -9,8 +9,8 @@ use crate::crawler;
 use crate::llm::provider::LlmClient;
 use crate::pipeline::processor;
 
-const BASE_INTERVAL_SECS: u64 = 6 * 3600; // 6 hours
-const JITTER_MAX_SECS: u64 = 900; // 15 minutes
+const BASE_INTERVAL_SECS: u64 = 24 * 3600; // 24 hours
+const JITTER_MAX_SECS: u64 = 1800; // 30 minutes
 
 /// Run the crawl scheduler loop.
 ///

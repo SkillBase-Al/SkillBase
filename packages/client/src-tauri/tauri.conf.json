@@ -1,6 +1,6 @@
 {
   "productName": "SkillBase",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "identifier": "com.skillbase.app",
   "build": {
     "frontendDist": "../dist",

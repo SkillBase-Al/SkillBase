@@ -9,6 +9,8 @@ use serde_json::json;
 use std::net::SocketAddr;
 use uuid::Uuid;
 
+use std::time::Instant;
+
 use crate::api::router::AppState;
 use crate::assessment::assessor;
 use crate::db::models::*;
@@ -139,6 +141,113 @@ fn validate_pagination(page: Option<u32>, per_page: Option<u32>) -> (u32, u32) {
 /// GET /api/v1/health
 pub async fn health() -> impl IntoResponse {
     (StatusCode::OK, Json(json!({"status": "ok"})))
+}
+
+/// GET /api/v1/version
+pub async fn version() -> Json<serde_json::Value> {
+    let v = std::env::var("SKILLBASE_VERSION")
+        .unwrap_or_else(|_| env!("CARGO_PKG_VERSION").to_string());
+    Json(json!({ "version": v }))
+}
+
+/// GET /api/v1/downloads
+///
+/// Fetches the latest release from GitHub API and returns version + download URLs.
+/// Results are cached for 5 minutes to avoid GitHub API rate limits.
+pub async fn downloads() -> Json<serde_json::Value> {
+    use std::sync::OnceLock;
+
+    static CACHE: OnceLock<std::sync::Mutex<Option<(Instant, serde_json::Value)>>> = OnceLock::new();
+    let cache = CACHE.get_or_init(|| std::sync::Mutex::new(None));
+
+    // Check cache
+    {
+        if let Ok(guard) = cache.lock() {
+            if let Some((timestamp, data)) = guard.as_ref() {
+                if timestamp.elapsed().as_secs() < 1200 {
+                    return Json(data.clone());
+                }
+            }
+        }
+    }
+
+    // Try GitHub API
+    let fallback = || {
+        Json(json!({
+            "version": std::env::var("SKILLBASE_VERSION").unwrap_or_else(|_| env!("CARGO_PKG_VERSION").to_string()),
+            "downloads": []
+        }))
+    };
+
+    let client = reqwest::Client::builder()
+        .user_agent("skill-manager/0.1")
+        .timeout(std::time::Duration::from_secs(10))
+        .build();
+
+    let client = match client {
+        Ok(c) => c,
+        Err(_) => return fallback(),
+    };
+
+    let resp = client
+        .get("https://api.github.com/repos/SkillBase-Al/SkillBase/releases/latest")
+        .header("Accept", "application/vnd.github.v3+json")
+        .send()
+        .await;
+
+    let resp = match resp {
+        Ok(r) if r.status().is_success() => r,
+        _ => return fallback(),
+    };
+
+    let body: serde_json::Value = match resp.json().await {
+        Ok(v) => v,
+        Err(_) => return fallback(),
+    };
+
+    let tag_name = body["tag_name"].as_str().unwrap_or("");
+    let version = tag_name.strip_prefix('v').unwrap_or(tag_name);
+
+    // Extract downloadable assets (filter by known platform patterns)
+    let platform_patterns = [
+        ("macos", "aarch64.dmg"),
+        ("macos-x86", "x86_64.dmg"),
+        ("windows-exe", "x64-setup.exe"),
+        ("windows-msi", "x64_en-US.msi"),
+        ("linux-appimage", "amd64.AppImage"),
+        ("linux-deb", "amd64.deb"),
+    ];
+
+    let assets = body["assets"].as_array().map(|arr| {
+        arr.iter().filter_map(|a| {
+            let name = a["name"].as_str()?;
+            let url = a["browser_download_url"].as_str()?;
+            let size = a["size"].as_u64().unwrap_or(0);
+            Some((name.to_string(), url.to_string(), size))
+        }).collect::<Vec<_>>()
+    }).unwrap_or_default();
+
+    let downloads: Vec<serde_json::Value> = platform_patterns.iter().filter_map(|(id, suffix)| {
+        let (name, url, size) = assets.iter().find(|(name, _, _)| name.ends_with(suffix))?;
+        Some(json!({
+            "platform": id,
+            "name": name,
+            "url": url,
+            "size": size,
+        }))
+    }).collect();
+
+    let result = json!({
+        "version": version,
+        "downloads": downloads,
+    });
+
+    // Update cache
+    if let Ok(mut guard) = cache.lock() {
+        *guard = Some((Instant::now(), result.clone()));
+    }
+
+    Json(result)
 }
 
 /// GET /api/v1/stats

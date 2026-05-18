@@ -6,11 +6,10 @@ fn get_proxy_url(conn: &DbConn) -> Option<String> {
     repository::get_setting(conn, "proxy_url").ok().flatten()
 }
 
-fn get_server_url(conn: &DbConn) -> String {
-    repository::get_setting(conn, "server_url")
-        .ok().flatten()
-        .filter(|s| !s.is_empty())
-        .unwrap_or_else(|| "http://skills.yy-crow.com".into())
+fn get_server_url(_conn: &DbConn) -> String {
+    // Server URL is fixed at build/deploy time — not user-configurable
+    std::env::var("SKILLBASE_SERVER_URL")
+        .unwrap_or_else(|_| "http://skills.yy-crow.com".into())
 }
 
 /// Search the marketplace for skills.
